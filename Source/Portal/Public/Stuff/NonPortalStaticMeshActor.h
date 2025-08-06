@@ -4,21 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "BaseStaticMeshActor.h"
-#include "PortalStaticMeshActor.generated.h"
+#include "NonPortalStaticMeshActor.generated.h"
 
 UCLASS()
-class PORTAL_API APortalStaticMeshActor : public ABaseStaticMeshActor
+class PORTAL_API ANonPortalStaticMeshActor : public ABaseStaticMeshActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	APortalStaticMeshActor();
+	ANonPortalStaticMeshActor();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
+	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
 };

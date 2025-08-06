@@ -1,33 +1,32 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Stuff/PortalStaticMeshActor.h"
+#include "Stuff/NonPortalStaticMeshActor.h"
 
 #include "PortalProjectile.h"
 
 
 // Sets default values
-APortalStaticMeshActor::APortalStaticMeshActor()
+ANonPortalStaticMeshActor::ANonPortalStaticMeshActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	bPortal = false;
 }
 
 // Called when the game starts or when spawned
-void APortalStaticMeshActor::BeginPlay()
+void ANonPortalStaticMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-void APortalStaticMeshActor::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
+void ANonPortalStaticMeshActor::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	if (OtherActor->IsA(APortalProjectile::StaticClass()) == bPortal)
 	{
-		// Portal 생성 로직	
+		// 픽하고 사라지는 이펙트 연출
 	}
 	return;
 }
-
-
