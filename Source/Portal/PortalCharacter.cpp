@@ -11,6 +11,10 @@
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
 
+#include "Park/RelatedPhysics/PlayerMovementComponent.h"
+#include "Utility/DebugHelper.h"
+#include "Utility/Helper.h"
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -35,6 +39,7 @@ APortalCharacter::APortalCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	PlayerMovementComponent = Helper::CreateActorComponent<UPlayerMovementComponent>(this, "MovementComp");
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -86,6 +91,7 @@ void APortalCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 		AddMovementInput(GetActorRightVector(), MovementVector.X);
 	}
+	DEBUG_HELPER_PRINT_VECTOR(this->GetActorLocation(), 2);
 }
 
 void APortalCharacter::Look(const FInputActionValue& Value)
