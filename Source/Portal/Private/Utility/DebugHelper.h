@@ -11,8 +11,8 @@ DEBUG_HELPER_LOG_THIS_LINE
 DEBUG_HELPER_WARNING_THIS_LINE
 DEBUG_HELPER_LOG_THIS_INSTANCE(this)
 
-DEBUG_HELPER_PRINT_THIS_LINE
-DEBUG_HELPER_PRINT_THIS_INSTANCE(this)
+DEBUG_HELPER_PRINT_THIS_LINE(Key)
+DEBUG_HELPER_PRINT_THIS_INSTANCE(this, Key)
 
 DEBUG_HELPER_PRINT_BOOL(InBool, Key)
 DEBUG_HELPER_PRINT_INT(InInt, Key)
@@ -31,9 +31,13 @@ namespace DEBUG_HELPER
 {
 #pragma region Log_Message
 
-#define DEBUG_HELPER_LOG_THIS_LINE UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__CURRENT_LINE__))
-#define DEBUG_HELPER_WARNING_THIS_LINE UE_LOG(CustomDebuggingLog, Type::Warning, TEXT("%s"), *(__CURRENT_LINE__))
-#define DEBUG_HELPER_LOG_THIS_INSTANCE(This) UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s, %s"), *(__CURRENT_INSTANCE__(This)), *(__CURRENT_LINE__))
+#define DEBUG_HELPER_LOG_THIS_LINE \
+	UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__CURRENT_LINE__))
+#define DEBUG_HELPER_WARNING_THIS_LINE \
+	UE_LOG(CustomDebuggingLog, Type::Warning, TEXT("%s"), *(__CURRENT_LINE__))
+#define DEBUG_HELPER_LOG_THIS_INSTANCE(This) \
+	UE_LOG(CustomDebuggingLog, Type::Log, \
+	TEXT("%s, %s"), *(__CURRENT_INSTANCE__(This)), *(__CURRENT_LINE__))
 	
 	// Custom Message
 	void Log(const FString& Msg);	
@@ -60,9 +64,9 @@ namespace DEBUG_HELPER
 	};
 
 	// Useful Macros
-#define DEBUG_HELPER_PRINT_THIS_LINE DEBUG_HELPER::PrintOnScreen(*(__CURRENT_L__))
-#define DEBUG_HELPER_PRINT_THIS_INSTANCE(This) \
-	DEBUG_HELPER::PrintOnScreen(__CURRENT_I__(This) + " : " + __CURRENT_L__)
+#define DEBUG_HELPER_PRINT_THIS_LINE(Key) DEBUG_HELPER::PrintOnScreen(__CURRENT_L__, Key)
+#define DEBUG_HELPER_PRINT_THIS_INSTANCE(This, Key) \
+	DEBUG_HELPER::PrintOnScreen(__CURRENT_I__(This) + " : " + __CURRENT_L__, Key)
 #define DEBUG_HELPER_PRINT_BOOL(InBool, Key) DEBUG_HELPER::PrintBool(__STRINGYFY__(InBool), InBool, Key)
 #define DEBUG_HELPER_PRINT_INT(InInt, Key) DEBUG_HELPER::PrintInt(__STRINGYFY__(InInt), InInt, Key)
 #define DEBUG_HELPER_PRINT_FLOAT(InFloat, Key) DEBUG_HELPER::PrintFloat(__STRINGYFY__(InFloat), InFloat, Key)
