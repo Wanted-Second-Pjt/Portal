@@ -1,31 +1,55 @@
 ﻿#include "DebugHelperTable.h"
 #include "DebugHelperVVV.h"
 
-bool UDebugHelperVVV::bCleaningData = false;
+bool UDebugHelperTable::bStopData = false;
+TMap<uint32, FString> UDebugHelperTable::DebuggingLocationMap = TMap<uint32, FString>();
 
-bool UDebugHelperVVV::PreventGetter()
+void UDebugHelperTable::RememberLocation(const uint32& Key, const FString& Location)
 {
-	return bCleaningData;
+	DebuggingLocationMap.Add(Key, Location);
 }
 
-void UDebugHelperVVV::SetInitTiming()
+void UDebugHelperTable::RememberLocation(const FString& Location)
 {
-	FWorldDelegates::OnPostWorldCreation.AddStatic(&UDebugHelperVVV::InitData);
+	DebuggingLocationMap.Add(FCrc::StrCrc32(GetData(Location)), Location);
 }
 
-void UDebugHelperVVV::SetCleanupTiming()
+bool UDebugHelperTable::PreventGetter()
 {
-	FWorldDelegates::OnWorldCleanup.AddStatic(&UDebugHelperVVV::CleanupData);
+	return bStopData;
 }
 
-void UDebugHelperVVV::InitData(UWorld* World)
+void UDebugHelperTable::SetReStartTiming()
 {
-	DEBUG_HELPER_VVV::Log("InitData");
-	bCleaningData = false;
+	//FWorldDelegates::OnPostWorldCreation.AddStatic(&UDebugHelperVVV::InitData);
 }
 
-void UDebugHelperVVV::CleanupData(UWorld* World, bool bSessionEnded, bool bCleanUpResources)
+void UDebugHelperTable::SetStopTiming()
 {
-	DEBUG_HELPER_VVV::Log("CleanData");
-	bCleaningData = true;
+	//FWorldDelegates::OnWorldCleanup.AddStatic(&UDebugHelperVVV::ReStartData);
+}
+
+void UDebugHelperTable::SetDestroyTiming()
+{
+	FEditorDelegates::PrePIEEnded.AddStatic(&UDebugHelperTable::DestroyData);
+}
+
+void UDebugHelperTable::InitData(UWorld* World)
+{
+	bStopData = false;
+}
+
+void UDebugHelperTable::StopData(UWorld* World, bool bSessionEnded, bool bCleanUpResources)
+{
+	bStopData = true;
+}
+
+void UDebugHelperTable::DestroyData(bool bIsSimulating)
+{
+	for (const TPair<uint32, FString>& It : DebuggingLocationMap)
+	{
+		UE_LOG(LogPath, Type::Warning, TEXT("%s"), *It.Value);
+	}
+	
+	DebuggingLocationMap.Empty();
 }

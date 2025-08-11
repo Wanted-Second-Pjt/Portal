@@ -3,28 +3,28 @@
 #include <CoreMinimal.h>
 #include "ObjectLifeCycleSingleton.h"
 
-class UDebugHelperVVV final : public TObjectLifeCycleSingleton<UDebugHelperVVV>
+
+
+class UDebugHelperTable final : public TObjectLifeCycleSingleton<UDebugHelperTable>
 {
+	friend TObjectLifeCycleSingleton;
 public:
-	struct FParam_PrintOnScreen
-	{
-		FString Message = "";
-		int Key = 0;
-		float Time = 1.0f;
-		FColor Color = FColor::Cyan;
-		bool bNewerOnTop = true;
-	};	
+	static void RememberLocation(const uint32& Key, const FString& Location);
+	static void RememberLocation(const FString& Location);
 	
 private:
 	virtual bool PreventGetter() override;
-	virtual void SetInitTiming() override;
-	virtual void SetCleanupTiming() override;
-	virtual void SetDestroyTiming() override {};
+	
+	virtual void SetStopTiming() override;
+	virtual void SetReStartTiming() override;
+	virtual void SetDestroyTiming() override;
 	
 	static void InitData(UWorld* World);
-	static void CleanupData(UWorld* World, bool bSessionEnded, bool bCleanUpResources);
+	static void StopData(UWorld* World, bool bSessionEnded, bool bCleanUpResources);
+	static void DestroyData(bool bIsSimulating);
 	
 private:
-	static bool bCleaningData;
-	
+	static bool bStopData;
+	// (Hash, Location)
+	static TMap<uint32, FString> DebuggingLocationMap;
 };

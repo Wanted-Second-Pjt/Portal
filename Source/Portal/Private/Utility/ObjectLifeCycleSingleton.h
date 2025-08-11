@@ -2,28 +2,33 @@
 
 #include <CoreMinimal.h>
 
-template<class Class>
+template<class TClass>
 class TObjectLifeCycleSingleton : public UObject
 {	
 public:
 	UFUNCTION(Category = Singleton)
-	static Class* Get()
+	static TClass* Get()
 	{
-		if (bIsShuttingDown && PreventGetter())
+		if (bIsShuttingDown)
 		{
 			return nullptr;
 		}
 		
 		if (Instance == nullptr || IsValid(Instance) == false)
 		{
-			Instance = NewObject<Class>();
+			Instance = NewObject<TClass>();
 			// Delete Only GameInstance Shutdown Call
 			Instance->AddToRoot();
 			
 			FCoreDelegates::OnPreExit.AddStatic(&TObjectLifeCycleSingleton::Destroy);
-			SetInitTiming();
-			SetCleanupTiming();
-			SetDestroyTiming();
+			Instance->SetStopTiming();
+			Instance->SetReStartTiming();
+			Instance->SetDestroyTiming();
+		}
+
+		if (Instance->PreventGetter())
+		{
+			return nullptr;
 		}
 		
 		return Instance;
@@ -41,23 +46,23 @@ public:
 	}
 
 protected:
-	UFUNCTION(Category = Singleton)
+	UFUNCTION(Category = CanExecute)
 	virtual bool PreventGetter() PURE_VIRTUAL(UObjectLifeCycleSingleton::PreventGetter, return false; );
 	
-	UFUNCTION(Category = Singleton)
-	virtual void SetInitTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetInitTiming, );
-	UFUNCTION(Category = Singleton)
-	virtual void SetCleanupTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetInitTiming, );
-	UFUNCTION(Category = Singleton)
+	UFUNCTION(Category = Stop)
+	virtual void SetStopTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetInitTiming, );
+	UFUNCTION(Category = Init)
+	virtual void SetReStartTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetInitTiming, );
+	UFUNCTION(Category = Stop)
 	virtual void SetDestroyTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetDestroyTiming, );
 	
 private:
-	static TSubclassOf<Class> Instance;
+	static TObjectPtr<TClass> Instance;
 	
 	static bool bIsShuttingDown;
 };
 
-template<class Class>
-TSubclassOf<Class> TObjectLifeCycleSingleton<Class>::Instance = nullptr;
-template<class Class>
-bool TObjectLifeCycleSingleton<Class>::bIsShuttingDown = false;
+template<class TClass>
+TObjectPtr<TClass> TObjectLifeCycleSingleton<TClass>::Instance = nullptr;
+template<class TClass>
+bool TObjectLifeCycleSingleton<TClass>::bIsShuttingDown = false;
