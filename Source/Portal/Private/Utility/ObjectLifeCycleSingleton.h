@@ -2,67 +2,70 @@
 
 #include <CoreMinimal.h>
 
-template<class TClass>
-class TObjectLifeCycleSingleton : public UObject
-{	
+#include "SComponentClassCombo.h"
+
+template<class IC>
+class TObjectLifeCycleSingleton
+{
+	static IC* Instance;
+	static bool bIsShuttingDown;
 public:
-	UFUNCTION(Category = Singleton)
-	static TClass* Get()
+	static IC* Get()
 	{
+		if (!GEngine || !IsInGameThread())
+		{
+			return nullptr;
+		}
 		if (bIsShuttingDown)
 		{
 			return nullptr;
 		}
 		
-		if (Instance == nullptr || IsValid(Instance) == false)
+		
+		if (Instance == nullptr)
 		{
-			Instance = NewObject<TClass>();
-			// Delete Only GameInstance Shutdown Call
-			Instance->AddToRoot();
+			Instance = new IC();
 			
 			FCoreDelegates::OnPreExit.AddStatic(&TObjectLifeCycleSingleton::Destroy);
 			Instance->SetStopTiming();
 			Instance->SetReStartTiming();
 			Instance->SetDestroyTiming();
 		}
-
-		if (Instance->PreventGetter())
+		if (Instance != nullptr && !Instance->PreventGetter())
 		{
-			return nullptr;
+			return Instance;
 		}
 		
-		return Instance;
+		return nullptr;
 	}
 
-	UFUNCTION(Category = Singleton)
 	static void Destroy()
 	{
 		bIsShuttingDown = true;
-		if (Instance != nullptr && IsValid(Instance))
+		if (Instance != nullptr)
 		{
-			Instance->RemoveFromRoot();
+			delete Instance;
 			Instance = nullptr;
 		}
 	}
 
+	TObjectLifeCycleSingleton(const TObjectLifeCycleSingleton&) = delete;
+	TObjectLifeCycleSingleton& operator=(const TObjectLifeCycleSingleton&) = delete;
+	TObjectLifeCycleSingleton(TObjectLifeCycleSingleton&&) = delete;
+	TObjectLifeCycleSingleton& operator=(TObjectLifeCycleSingleton&&) = delete;
+
 protected:
-	UFUNCTION(Category = CanExecute)
-	virtual bool PreventGetter() PURE_VIRTUAL(UObjectLifeCycleSingleton::PreventGetter, return false; );
+	TObjectLifeCycleSingleton() = default;
+	virtual ~TObjectLifeCycleSingleton() = default;
 	
-	UFUNCTION(Category = Stop)
-	virtual void SetStopTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetInitTiming, );
-	UFUNCTION(Category = Init)
-	virtual void SetReStartTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetInitTiming, );
-	UFUNCTION(Category = Stop)
-	virtual void SetDestroyTiming() PURE_VIRTUAL(UObjectLifeCycleSingleton::SetDestroyTiming, );
+	virtual bool PreventGetter() = 0;
 	
-private:
-	static TObjectPtr<TClass> Instance;
-	
-	static bool bIsShuttingDown;
+	virtual void SetStopTiming() = 0;
+	virtual void SetReStartTiming() = 0;
+	virtual void SetDestroyTiming() = 0;
 };
 
-template<class TClass>
-TObjectPtr<TClass> TObjectLifeCycleSingleton<TClass>::Instance = nullptr;
-template<class TClass>
-bool TObjectLifeCycleSingleton<TClass>::bIsShuttingDown = false;
+template<class IC>
+IC* TObjectLifeCycleSingleton<IC>::Instance = nullptr;
+template<class IC>
+bool TObjectLifeCycleSingleton<IC>::bIsShuttingDown = false;

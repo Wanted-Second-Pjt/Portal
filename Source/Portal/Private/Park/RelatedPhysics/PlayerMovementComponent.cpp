@@ -8,13 +8,14 @@
 UPlayerMovementComponent::UPlayerMovementComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
 	GravityScale = 1.0f;
+	/*
 	MaxFlySpeed = TerminalVelocity;
 	MaxWalkSpeed = 320.0f;
 	JumpZVelocity = 512.0f;
 	AirControl = 1.0f;
 	FallingLateralFriction = 0.0f;
+	*/
 }
 
 void UPlayerMovementComponent::BeginPlay()
@@ -39,12 +40,3 @@ void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
-
-void UPlayerMovementComponent::ApplyVelocityBraking(float DeltaTime, float Friction, float BrakingDeceleration)
-{
-	if (IsFalling())
-		return;
-	
-	Super::ApplyVelocityBraking(DeltaTime, Friction, BrakingDeceleration);
-}
-

@@ -28,37 +28,37 @@
 #define __MAKE_EXPRESSION__(expression, counting)		expression##counting
 #define __MAKE_ARGS_MACRO__(expression, counting)		__MAKE_EXPRESSION__(expression, counting)
 
-#define __PRINT_THIS_LINE__1(Key) DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, __SCOPE__, Key)
-#define __PRINT_THIS_LINE__0() DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, __SCOPE__,\
-	DEBUG_HELPER_VVV::Hashing(__SCOPE__, __LINE__), FColor::Green)
+#define __PRINT_THIS_LINE__1(Key) FDebugHelperVVV::Get()->PrintOnScreen(__SCOPE__, __SCOPE__, Key)
+#define __PRINT_THIS_LINE__0() FDebugHelperVVV::Get()->PrintOnScreen(__SCOPE__, __SCOPE__,\
+	FDebugHelperVVV::Get()->Hashing(__SCOPE__, __LINE__), FColor::Green)
 
-#define __PRINT_INSTANCE__2(Instance, Key) DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, __INSTANCE__(Instance), Key)
-#define __PRINT_INSTANCE__1(Instance) DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, __INSTANCE__(Instance),\
-	DEBUG_HELPER_VVV::Hashing(__INSTANCE__(Instance), __LINE__), FColor::Orange)
-#define __PRINT_INSTANCE__0() DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, __INSTANCE__(this),\
-	DEBUG_HELPER_VVV::Hashing(__INSTANCE__(this), __LINE__), FColor::Orange)
+#define __PRINT_INSTANCE__2(Instance, Key) FDebugHelperVVV::Get()->PrintOnScreen(__SCOPE__, __INSTANCE__(Instance), Key)
+#define __PRINT_INSTANCE__1(Instance) FDebugHelperVVV::Get()->PrintOnScreen(__SCOPE__, __INSTANCE__(Instance),\
+	FDebugHelperVVV::Get()->Hashing(__INSTANCE__(Instance), __LINE__), FColor::Orange)
+#define __PRINT_INSTANCE__0() FDebugHelperVVV::Get()->PrintOnScreen(__SCOPE__, __INSTANCE__(this),\
+	FDebugHelperVVV::Get()->Hashing(__INSTANCE__(this), __LINE__), FColor::Orange)
 
-#define __PRINT_SCREEN__2(InStr, Key) DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, __STRINGYFY__(Key) + " : " + InStr, Key)
-#define __PRINT_SCREEN__1(InStr) DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, InStr,\
-	DEBUG_HELPER_VVV::Hashing(__STRINGYFY__(InStr), __LINE__), FColor::Emerald)
-#define __PRINT_BOOL__2(InBool, Key) DEBUG_HELPER_VVV::PrintBool(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InBool), InBool, Key)
-#define __PRINT_BOOL__1(InBool) DEBUG_HELPER_VVV::PrintBool(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InBool), InBool,\
- 	DEBUG_HELPER_VVV::Hashing(__STRINGYFY__(InBool), __LINE__), FColor::Emerald)
-#define __PRINT_INT__2(InInt, Key) DEBUG_HELPER_VVV::PrintInt(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InInt), InInt, Key)
-#define __PRINT_INT__1(InInt) DEBUG_HELPER_VVV::PrintInt(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InInt), InInt,\
-	DEBUG_HELPER_VVV::Hashing(__STRINGYFY__(InInt), __LINE__), FColor::Emerald)
-#define __PRINT_FLOAT__2(InFloat, Key) DEBUG_HELPER_VVV::PrintFloat(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InFloat), InFloat, Key)
-#define __PRINT_FLOAT__1(InFloat) DEBUG_HELPER_VVV::PrintFloat(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InFloat), InFloat,\
- 	DEBUG_HELPER_VVV::Hashing(__STRINGYFY__(InFloat), __LINE__), FColor::Emerald)
-#define __PRINT_VECTOR__2(InVec, Key) DEBUG_HELPER_VVV::PrintVector3(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InVec), InVec, Key)
-#define __PRINT_VECTOR__1(InVec) DEBUG_HELPER_VVV::PrintVector3(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InVec), InVec,\
- 	DEBUG_HELPER_VVV::Hashing(__STRINGYFY__(InVec), __LINE__), FColor::Emerald)
-#define __PRINT_ROTATOR__2(InRot, Key) DEBUG_HELPER_VVV::PrintRotator(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InRot), InRot, Key)
-#define __PRINT_ROTATOR__1(InRot) DEBUG_HELPER_VVV::PrintRotator(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InRot), InRot,\
- 	DEBUG_HELPER_VVV::Hashing(__STRINGYFY__(InRot), __LINE__), FColor::Emerald)
-#define __PRINT_QUAT__2(InQuat, Key) DEBUG_HELPER_VVV::PrintQuaternion(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InQuat), InQuat, Key)
-#define __PRINT_QUAT__1(InQuat) DEBUG_HELPER_VVV::PrintQuaternion(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InQuat), InQuat,\
- 	DEBUG_HELPER_VVV::Hashing(__STRINGYFY__(InQuat), __LINE__), FColor::Emerald)
+#define __PRINT_SCREEN__2(InStr, Key) FDebugHelperVVV::Get()->PrintOnScreen(__SCOPE__, __STRINGYFY__(Key) + " : " + InStr, Key)
+#define __PRINT_SCREEN__1(InStr) FDebugHelperVVV::Get()->PrintOnScreen(__SCOPE__, InStr,\
+	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InStr), __LINE__), FColor::Emerald)
+#define __PRINT_BOOL__2(InBool, Key) FDebugHelperVVV::Get()->PrintBool(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InBool), InBool, Key)
+#define __PRINT_BOOL__1(InBool) FDebugHelperVVV::Get()->PrintBool(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InBool), InBool,\
+ 	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InBool), __LINE__), FColor::Emerald)
+#define __PRINT_INT__2(InInt, Key) FDebugHelperVVV::Get()->PrintInt(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InInt), InInt, Key)
+#define __PRINT_INT__1(InInt) FDebugHelperVVV::Get()->PrintInt(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InInt), InInt,\
+	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InInt), __LINE__), FColor::Emerald)
+#define __PRINT_FLOAT__2(InFloat, Key) FDebugHelperVVV::Get()->PrintFloat(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InFloat), InFloat, Key)
+#define __PRINT_FLOAT__1(InFloat) FDebugHelperVVV::Get()->PrintFloat(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InFloat), InFloat,\
+ 	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InFloat), __LINE__), FColor::Emerald)
+#define __PRINT_VECTOR__2(InVec, Key) FDebugHelperVVV::Get()->PrintVector3(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InVec), InVec, Key)
+#define __PRINT_VECTOR__1(InVec) FDebugHelperVVV::Get()->PrintVector3(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InVec), InVec,\
+ 	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InVec), __LINE__), FColor::Emerald)
+#define __PRINT_ROTATOR__2(InRot, Key) FDebugHelperVVV::Get()->PrintRotator(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InRot), InRot, Key)
+#define __PRINT_ROTATOR__1(InRot) FDebugHelperVVV::Get()->PrintRotator(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InRot), InRot,\
+ 	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InRot), __LINE__), FColor::Emerald)
+#define __PRINT_QUAT__2(InQuat, Key) FDebugHelperVVV::Get()->PrintQuaternion(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InQuat), InQuat, Key)
+#define __PRINT_QUAT__1(InQuat) FDebugHelperVVV::Get()->PrintQuaternion(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InQuat), InQuat,\
+ 	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InQuat), __LINE__), FColor::Emerald)
 	
 #pragma endregion For_Inline_Macro
 

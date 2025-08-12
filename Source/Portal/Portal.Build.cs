@@ -13,6 +13,11 @@ public class Portal : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
 			"PhysicsCore"
 		});
+		
+		PrivateDependencyModuleNames.AddRange(new string [] {
+			"UnrealEd",				
+			
+		});
 
 		PrivateIncludePaths.Add(ModuleDirectory);
 		PublicIncludePaths.Add(ModuleDirectory);

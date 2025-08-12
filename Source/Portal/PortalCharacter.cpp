@@ -12,7 +12,6 @@
 #include "Engine/LocalPlayer.h"
 
 #include "Park/RelatedPhysics/PlayerMovementComponent.h"
-#include "Utility/DebugHelperVVV.h"
 #include "Utility/Helper.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -91,11 +90,6 @@ void APortalCharacter::Move(const FInputActionValue& Value)
 		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 		AddMovementInput(GetActorRightVector(), MovementVector.X);
 	}
-
-	DEBUG_HELPER_VVV::PrintOnScreen(__SCOPE__, FPlatformProcess::ExecutableName());
-	DEBUG_HELPER_LOG(this->GetName());
-	DEBUG_HELPER_PRINT_INSTANCE(GetMovementComponent(), 3);
-	DEBUG_HELPER_PRINT_VECTOR(GetActorLocation());
 	
 }
 

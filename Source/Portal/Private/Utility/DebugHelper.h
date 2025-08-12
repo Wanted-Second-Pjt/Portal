@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
-#include "CoreMinimal.h"
-#include "DebugHelperTable.h"
+#include <CoreMinimal.h>
+#include "ObjectLifeCycleSingleton.h"
 #include "DebugMacros.h"
+
 
 /*
 * 1. 
@@ -20,7 +21,6 @@ Debug 장소를 기억했다가 게임이 끝날 때 로그로 보여줍니다.
 게임을 종료하면(정지 버튼 누르면) 테이블 다 초기화됩니다.
 이 외에는 런타임에 영향을 주지 않습니다.
  */
-class UDebugHelperTable;
 DECLARE_LOG_CATEGORY_EXTERN(CustomDebuggingLog, Type::Log, All);
 typedef FString FLocationInfo;
 
@@ -53,22 +53,22 @@ DEBUG_HELPER_PRINT_QUAT(InQuat (, Key) )
 * This : Send To Argument "this" in your instance
 * In : Send To Argument "your value" in your class
 * Key : If `equal key` is inserted, one Message Cover the other.
-* if Key is empty, Use SelfHashing (Fast, not to worry)
+* if the Key is empty, Use SelfHashing (Fast, not to worry)
 */
-namespace DEBUG_HELPER_VVV
-{
-#pragma region Log_Message
 
-#define DEBUG_HELPER_LOG(Msg) DEBUG_HELPER_VVV::Log(__SCOPE__, Msg)
-#define DEBUG_HELPER_WARNING(Msg) DEBUG_HELPER_VVV::Warning(__SCOPE__, Msg)
-#define DEBUG_HELPER_LOG_THIS_LINE \
-	UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__SCOPE__))
-#define DEBUG_HELPER_WARNING_THIS_LINE \
-	UE_LOG(CustomDebuggingLog, Type::Warning, TEXT("%s"), *(__SCOPE__))
-#define DEBUG_HELPER_LOG_THIS_INSTANCE \
-	UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__INSTANCE__(this)))
-#define DEBUG_HELPER_LOG_INSTANCE(Instance) \
-	UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__INSTANCE__(Instance)))
+class FDebugHelperVVV final : public TObjectLifeCycleSingleton<FDebugHelperVVV>
+{
+#pragma region Debug
+public:
+	static void RememberLocation(const uint32& Key, const FString& Location);
+	static void RememberLocation(const FString& Location);
+
+	static uint32 Hashing(const FString& Input, int Line);
+private:
+	static TMap<uint32, FString> DebuggingLocationMap;
+
+public:
+	#pragma region Log_Message
 	
 	// Custom Message
 	void Log(const FLocationInfo& Scope, const FString& Msg);	
@@ -85,32 +85,9 @@ namespace DEBUG_HELPER_VVV
 	void CheckQuaternion(const FLocationInfo& Scope, const FString& StrName, const FQuat& InQuaternion, uint32 Decimal = 4);
 	
 #pragma endregion Log_Message
-	
+
 #pragma region Screen_Message
-
-#define DEBUG_HELPER_PRINT_SCREEN(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_SCREEN__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
-	// if empty, Print "current line"
-#define DEBUG_HELPER_PRINT_LINE(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_THIS_LINE__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
-	// if empty, Print "current this instance"
-#define DEBUG_HELPER_PRINT_INSTANCE(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_INSTANCE__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
-
-#define DEBUG_HELPER_PRINT_BOOL(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_BOOL__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
-#define DEBUG_HELPER_PRINT_INT(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_INT__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
-#define DEBUG_HELPER_PRINT_FLOAT(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_FLOAT__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
-#define DEBUG_HELPER_PRINT_VECTOR(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_VECTOR__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__) 
-#define DEBUG_HELPER_PRINT_ROTATOR(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_ROTATOR__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__) 
-#define DEBUG_HELPER_PRINT_QUAT(...)\
-	__MAKE_ARGS_MACRO__(__PRINT_QUAT__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__) 
-
-	// Custom Message
+	// Custom Message, Scope uses `__SCOPE__`
 	void PrintOnScreen(const FLocationInfo& Scope, const FString& Msg, int Key = 0, const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintBool(const FLocationInfo& Scope, const FString& StrName, const bool& InBool, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintInt(const FLocationInfo& Scope, const FString& StrName, const int& InInt, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
@@ -118,10 +95,62 @@ namespace DEBUG_HELPER_VVV
 	void PrintVector3(const FLocationInfo& Scope, const FString& StrName, const FVector& InVector3, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintRotator(const FLocationInfo& Scope, const FString& StrName, const FRotator& InRotator, const int& Key = 0, const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintQuaternion(const FLocationInfo& Scope, const FString& StrName, const FQuat& InQuaternion, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
-
-	uint32 Hashing(const FString& Input, int Line);
 	
 #pragma endregion Screen_Message
+#pragma endregion Debug
 
-}
+	
+#pragma region Singleton
+private:
+	friend class TObjectLifeCycleSingleton;
+	FDebugHelperVVV();
+	virtual ~FDebugHelperVVV() override = default;
+	
+	virtual bool PreventGetter() override;
+	
+	virtual void SetStopTiming() override;
+	virtual void SetReStartTiming() override;
+	virtual void SetDestroyTiming() override;
+	
+	static void InitData(UWorld* World);
+	static void StopData(UWorld* World, bool bSessionEnded, bool bCleanUpResources);
+	static void DestroyData(bool bIsSimulating);
+	
+private:
+	static bool bStopData;
+#pragma endregion Singleton
+};
 
+
+#define DEBUG_HELPER_LOG(Msg) if(FDebugHelperVVV::Get()) FDebugHelperVVV::Get()->Log(__SCOPE__, Msg)
+#define DEBUG_HELPER_WARNING(Msg) if(FDebugHelperVVV::Get()) FDebugHelperVVV::Get()->Warning(__SCOPE__, Msg)
+#define DEBUG_HELPER_LOG_THIS_LINE if(FDebugHelperVVV::Get()) \
+	UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__SCOPE__))
+#define DEBUG_HELPER_WARNING_THIS_LINE if(FDebugHelperVVV::Get()) \
+	UE_LOG(CustomDebuggingLog, Type::Warning, TEXT("%s"), *(__SCOPE__))
+#define DEBUG_HELPER_LOG_THIS_INSTANCE if(FDebugHelperVVV::Get()) \
+	UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__INSTANCE__(this)))
+#define DEBUG_HELPER_LOG_INSTANCE(Instance) if(FDebugHelperVVV::Get()) \
+	UE_LOG(CustomDebuggingLog, Type::Log, TEXT("%s"), *(__INSTANCE__(Instance)))
+
+#define DEBUG_HELPER_PRINT_SCREEN(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_SCREEN__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
+// if empty, Print "current line"
+#define DEBUG_HELPER_PRINT_LINE(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_THIS_LINE__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
+// if empty, Print "current this instance"
+#define DEBUG_HELPER_PRINT_INSTANCE(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_INSTANCE__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
+
+#define DEBUG_HELPER_PRINT_BOOL(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_BOOL__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
+#define DEBUG_HELPER_PRINT_INT(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_INT__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
+#define DEBUG_HELPER_PRINT_FLOAT(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_FLOAT__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
+#define DEBUG_HELPER_PRINT_VECTOR(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_VECTOR__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__) 
+#define DEBUG_HELPER_PRINT_ROTATOR(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_ROTATOR__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__) 
+#define DEBUG_HELPER_PRINT_QUAT(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_QUAT__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)

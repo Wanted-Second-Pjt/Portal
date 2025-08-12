@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "PortalComp.generated.h"
+#include "PortalComponent.generated.h"
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class PORTAL_API UPortalComp : public USceneComponent
+class PORTAL_API UPortalComponent : public USceneComponent
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
-	UPortalComp();
+	UPortalComponent();
 
 protected:
 	// Called when the game starts
