@@ -3,6 +3,7 @@
 #include "PortalProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 APortalProjectile::APortalProjectile() 
 {
@@ -25,11 +26,27 @@ APortalProjectile::APortalProjectile()
 	ProjectileMovement->InitialSpeed = 3000.f;
 	ProjectileMovement->MaxSpeed = 3000.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = true;
+	ProjectileMovement->bShouldBounce = false;
+	
+	ProjectileMovement->ProjectileGravityScale = 0.0f; 
+	ProjectileMovement->bSweepCollision = true;
+
+	ProjectileMovement->bAutoActivate = false; // Don't move until launched
+
 
 	// Die after 3 seconds by default
+	
 	InitialLifeSpan = 3.0f;
+
+
+	
+	PrimaryActorTick.bCanEverTick = false;
+
+
+	
 }
+
+
 
 void APortalProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
@@ -40,4 +57,25 @@ void APortalProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 		Destroy();
 	}
+}
+
+void APortalProjectile::BeginPlay()
+{
+	Super::BeginPlay();
+	TSubclassOf<AActor> PortalClass = StaticLoadClass(AActor::StaticClass(), nullptr, TEXT("/Game/Kang/PortalSystem/BP_Portal.BP_Portal_C"));
+	if (PortalClass)
+	{
+		TArray<AActor*> Portals;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), PortalClass, Portals);
+		if (Portals.Num() > 0)
+		{
+			Portal = Portals[0];
+		}
+	
+	
+	}
+
+	
+
+
 }

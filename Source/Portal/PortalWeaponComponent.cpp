@@ -18,6 +18,9 @@ UPortalWeaponComponent::UPortalWeaponComponent()
 {
 	// Default offset from the character location for projectiles to spawn
 	MuzzleOffset = FVector(100.0f, 0.0f, 10.0f);
+
+	
+	
 }
 
 
@@ -32,7 +35,7 @@ void UPortalWeaponComponent::Fire()
 	if (ProjectileClass != nullptr)
 	{
 		UWorld* const World = GetWorld();
-		if (World != nullptr)
+		if (World != nullptr && CanFire == true)
 		{
 			APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
 			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
@@ -40,6 +43,7 @@ void UPortalWeaponComponent::Fire()
 			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
 	
 			//Set Spawn Collision Handling Override
+			
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 	
@@ -65,6 +69,8 @@ void UPortalWeaponComponent::Fire()
 		}
 	}
 }
+
+
 
 bool UPortalWeaponComponent::AttachWeapon(APortalCharacter* TargetCharacter)
 {
@@ -97,6 +103,11 @@ bool UPortalWeaponComponent::AttachWeapon(APortalCharacter* TargetCharacter)
 	}
 
 	return true;
+}
+
+void UPortalWeaponComponent::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 void UPortalWeaponComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
