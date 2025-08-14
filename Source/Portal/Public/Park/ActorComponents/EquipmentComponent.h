@@ -24,4 +24,17 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION(BlueprintCallable)
+	void SetEquipment(AActor* Equipment);
+	UFUNCTION(BlueprintCallable)
+	void EquipmentAction();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bEquipSomething = false;
+	
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment", meta=(AllowPrivateAccess=true))
+	TObjectPtr<AActor> Equipment;
 };

@@ -104,6 +104,14 @@ void FDebugHelperVVV::PrintBool(const FLocationInfo& Scope, const FString& StrNa
 	PrintOnScreen(Scope,StrName + ": " + (InBool ? "True" : "False"), Key, Color, Time);
 }
 
+void FDebugHelperVVV::PrintByte(const FLocationInfo& Scope, const FString& StrName, const uint8& InByte, const int& Key,
+	const FColor& Color, const float& Time)
+{
+	FString StrByte = "";
+	for (int i = 0; i < 8; ++i) InByte & 1 << i ? StrByte += "1" : StrByte += "0";  
+	PrintOnScreen(Scope, StrName + ": " + StrByte, Key, Color, Time);
+}
+
 void FDebugHelperVVV::PrintInt(const FLocationInfo& Scope, const FString& StrName, const int& InInt, const int& Key, const FColor& Color, const float& Time)
 {
 	PrintOnScreen(Scope,StrName + ": " + FString::FromInt(InInt), Key, Color, Time);
@@ -152,13 +160,15 @@ uint32 FDebugHelperVVV::Hashing(const FString& Input, int Line)
 		const uint32 Step = Input.Len() * 0.2f;
 		const TCHAR* Data = *Input;
 		Hash =
-			Line ? Data[Step * 1 + 1] : Line |
-			Data[Step * 2 + 1] << 8 |
-			Data[Step * 3 + 1] << 16 |
-			Data[Step * 4 + 1] << 24
+			(Line ? Line : Data[Step * 1 + 1]) |
+			(Data[Step * 2 + 1] << 8) |
+			(Data[Step * 3 + 1] << 16) |
+			(Data[Step * 4 + 1] << 24)
 		;
-		//Warning(FString::Printf(TEXT("%c:0x%02X, %c:0x%02X, %c:0x%02X, %c:0x%02X"), Data[Step * 1 + 1], Data[Step * 1 + 1], Data[Step * 2 + 1], Data[Step * 2 + 1], Data[Step * 3 + 1], Data[Step * 3 + 1], Data[Step * 4 + 1], Data[Step * 4 + 1]));
-		//CheckBytesFour(Input, Hash);
+		//CheckInt(__SCOPE__, "Line", Line);
+		//Line ? Warning(__SCOPE__, FString::Printf(TEXT("%hs:0x%02X, %c:0x%02X, %c:0x%02X, %c:0x%02X"), "Line", Line, Data[Step * 2 + 1], Data[Step * 2 + 1], Data[Step * 3 + 1], Data[Step * 3 + 1], Data[Step * 4 + 1], Data[Step * 4 + 1]))
+		//	: Warning(__SCOPE__, FString::Printf(TEXT("%c:0x%02X, %c:0x%02X, %c:0x%02X, %c:0x%02X"), Data[Step * 1 + 1], Data[Step * 1 + 1], Data[Step * 2 + 1], Data[Step * 2 + 1], Data[Step * 3 + 1], Data[Step * 3 + 1], Data[Step * 4 + 1], Data[Step * 4 + 1]));
+		//CheckBytesFour(__SCOPE__, Input, Hash);
 	}
 
 	return Hash;

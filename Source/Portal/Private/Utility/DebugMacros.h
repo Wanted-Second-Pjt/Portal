@@ -44,6 +44,9 @@
 #define __PRINT_BOOL__2(InBool, Key) FDebugHelperVVV::Get()->PrintBool(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InBool), InBool, Key)
 #define __PRINT_BOOL__1(InBool) FDebugHelperVVV::Get()->PrintBool(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InBool), InBool,\
  	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InBool), __LINE__), FColor::Emerald)
+#define __PRINT_BYTE__2(InByte, Key) FDebugHelperVVV::Get()->PrintByte(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InByte), InByte, Key)
+#define __PRINT_BYTE__1(InByte) FDebugHelperVVV::Get()->PrintByte(__SCOPE__, __STRINGYFY__(InByte), InByte,\
+	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InByte), __LINE__), FColor::Emerald)
 #define __PRINT_INT__2(InInt, Key) FDebugHelperVVV::Get()->PrintInt(__SCOPE__, __STRINGYFY__(Key) + " : " + __STRINGYFY__(InInt), InInt, Key)
 #define __PRINT_INT__1(InInt) FDebugHelperVVV::Get()->PrintInt(__SCOPE__, __ORIGIN__ + __STRINGYFY__(InInt), InInt,\
 	FDebugHelperVVV::Get()->Hashing(__STRINGYFY__(InInt), __LINE__), FColor::Emerald)

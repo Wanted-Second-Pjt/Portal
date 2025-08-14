@@ -63,7 +63,7 @@ public:
 	static void RememberLocation(const uint32& Key, const FString& Location);
 	static void RememberLocation(const FString& Location);
 
-	static uint32 Hashing(const FString& Input, int Line);
+	uint32 Hashing(const FString& Input, int Line);
 private:
 	static TMap<uint32, FString> DebuggingLocationMap;
 
@@ -90,6 +90,7 @@ public:
 	// Custom Message, Scope uses `__SCOPE__`
 	void PrintOnScreen(const FLocationInfo& Scope, const FString& Msg, int Key = 0, const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintBool(const FLocationInfo& Scope, const FString& StrName, const bool& InBool, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
+	void PrintByte(const FLocationInfo& Scope, const FString& StrName, const uint8& InByte, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintInt(const FLocationInfo& Scope, const FString& StrName, const int& InInt, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintFloat(const FLocationInfo& Scope, const FString& StrName, const float& InFloat, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
 	void PrintVector3(const FLocationInfo& Scope, const FString& StrName, const FVector& InVector3, const int& Key = 0,  const FColor& Color = FColor::Cyan, const float& Time = 1.0f);
@@ -121,6 +122,7 @@ private:
 #pragma endregion Singleton
 };
 
+#define DEBUG_HELPER if(FDebugHelperVVV::Get()) FDebugHelperVVV::Get()
 
 #define DEBUG_HELPER_LOG(Msg) if(FDebugHelperVVV::Get()) FDebugHelperVVV::Get()->Log(__SCOPE__, Msg)
 #define DEBUG_HELPER_WARNING(Msg) if(FDebugHelperVVV::Get()) FDebugHelperVVV::Get()->Warning(__SCOPE__, Msg)
@@ -144,6 +146,8 @@ private:
 
 #define DEBUG_HELPER_PRINT_BOOL(...) if(FDebugHelperVVV::Get()) \
 	__MAKE_ARGS_MACRO__(__PRINT_BOOL__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
+#define DEBUG_HELPER_PRINT_BYTE(...) if(FDebugHelperVVV::Get()) \
+	__MAKE_ARGS_MACRO__(__PRINT_BYTE__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
 #define DEBUG_HELPER_PRINT_INT(...) if(FDebugHelperVVV::Get()) \
 	__MAKE_ARGS_MACRO__(__PRINT_INT__, __GET_ARGS_COUNT__(__VA_ARGS__))(__VA_ARGS__)
 #define DEBUG_HELPER_PRINT_FLOAT(...) if(FDebugHelperVVV::Get()) \

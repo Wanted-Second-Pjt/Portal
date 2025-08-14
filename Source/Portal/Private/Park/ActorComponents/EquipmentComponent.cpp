@@ -2,6 +2,8 @@
 
 
 #include "Park/ActorComponents/EquipmentComponent.h"
+#include "Park/Player/PlayerCharacter.h"
+
 
 
 // Sets default values for this component's properties
@@ -34,3 +36,15 @@ void UEquipmentComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	// ...
 }
 
+void UEquipmentComponent::SetEquipment(AActor* NewEquipment)
+{
+	this->Equipment = NewEquipment;
+	
+	NewEquipment->AttachToActor(GetOwner(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, CastChecked<APlayerCharacter>(GetOwner())->EquipmentName);
+	bEquipSomething = true;
+}
+
+void UEquipmentComponent::EquipmentAction()
+{
+	
+}

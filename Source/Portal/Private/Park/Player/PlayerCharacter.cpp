@@ -37,13 +37,28 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
+	if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
+	{}
+	
+	// ToDelegate in ControlComp.. what is faster?
+	// if (ControlComp->PressedMouseLeft())
+	// {
+	// 	EquipmentComp->NormalAction(true);
+	// }
+	// if (ControlComp->PressedMouseRight())
+	// {
+	// 	EquipmentComp->NormalAction(false);
+	// }
+	
 }
 
 // Called to bind functionality to input
@@ -52,4 +67,5 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	ControlComp->SetController(CastChecked<APlayerController>(GetController()));
 }
+
 
