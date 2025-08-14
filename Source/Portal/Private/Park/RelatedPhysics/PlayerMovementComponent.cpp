@@ -3,6 +3,7 @@
 
 #include "Park/RelatedPhysics/PlayerMovementComponent.h"
 #include "PhysicsEngine/PhysicsSettings.h"
+#include "Utility/DebugHelper.h"
 
 
 UPlayerMovementComponent::UPlayerMovementComponent()
@@ -26,7 +27,6 @@ void UPlayerMovementComponent::BeginPlay()
 	{
 		
 	}
-	
 }
 
 
@@ -39,4 +39,10 @@ void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	}
 	
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UPlayerMovementComponent::EnterPortal()
+{
+	//clamping
+	DEBUG_HELPER_PRINT_LINE();
 }

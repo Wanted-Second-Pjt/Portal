@@ -50,14 +50,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{}
 	
 	// ToDelegate in ControlComp.. what is faster?
-	// if (ControlComp->PressedMouseLeft())
-	// {
-	// 	EquipmentComp->NormalAction(true);
-	// }
-	// if (ControlComp->PressedMouseRight())
-	// {
-	// 	EquipmentComp->NormalAction(false);
-	// }
+	if (ControlComp->PressedMouseLeft())
+	{
+		//EquipmentComp->NormalAction(true);
+	}
+	if (ControlComp->PressedMouseRight())
+	{
+		//EquipmentComp->NormalAction(false);
+	}
 	
 }
 

@@ -53,14 +53,3 @@ FVector2D UControlComponent::GetDirection()
 	Direction.Y = PlayerController->IsInputKeyDown(EKeys::D) - PlayerController->IsInputKeyDown(EKeys::A);
 	return Direction.GetSafeNormal();
 }
-
-void UControlComponent::LeftAction()
-{
-	
-}
-
-void UControlComponent::RightAction()
-{
-}
-
-
