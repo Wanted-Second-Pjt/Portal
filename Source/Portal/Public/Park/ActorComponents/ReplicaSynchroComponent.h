@@ -2,11 +2,10 @@
 
 #pragma once
 
+class AReplicaCharacter;
+
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GameFramework/Character.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Animation/AnimInstance.h"
 #include "ReplicaSynchroComponent.generated.h"
 
 #pragma region ReplicaSynchro
@@ -41,7 +40,8 @@ public:
 	void SyncToReplica();
 	
 	UFUNCTION(BlueprintPure, Category = "Replica")
-	ACharacter* GetCurrentReplica() const { return CurrentReplica; }
+	AReplicaCharacter* GetCurrentReplica() const { return CurrentReplica; }
+	
 
 	UFUNCTION(BlueprintCallable, Category = "Portal")
 	void OnPlayerEnterPortal();
@@ -50,35 +50,28 @@ public:
 	void OnPlayerExitPortal();
 	
 	UFUNCTION(BlueprintCallable, Category = "Portal")
-	void UpdateReplicaVisibility(bool bVisible);
+	void SetReplicaVisibility(bool bVisible);
+	
+	UFUNCTION(BlueprintCallable, Category = "Portal")
+	void SetupPortalCamera(class USceneCaptureComponent2D* PortalCamera);
 #pragma endregion Replica
 	
 private:
 #pragma region Synchro
-	void SyncBoneTransforms();
-	void SyncAnimationState();
 	void SyncMovementData();
-	void SyncEquipmentState();
-	void SyncPortalWeaponAnimation();
 #pragma endregion Synchro
 
 #pragma region Util
 	class APlayerCharacter* GetPlayerCharacter() const;
-	void SetAnimInstanceProperty(const FString& PropertyName, float Value);
-	void SetAnimInstanceProperty(const FString& PropertyName, bool Value);
-	void SetAnimInstanceProperty(const FString& PropertyName, const FVector2D& Value);
 #pragma endregion Util
 	
 private:
 #pragma region Replica
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Replica Settings", meta = (AllowPrivateAccess))
-	TSubclassOf<ACharacter> ReplicaClass;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Replica Settings", meta = (AllowPrivateAccess))
-	FVector ReplicaSpawnOffset = FVector(0, 100, 0); // Debug : side to player
+	FVector ReplicaSpawnOffset = FVector(0, 0, 0); // Debug : with player
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Replica", meta = (AllowPrivateAccess))
-	TObjectPtr<ACharacter> CurrentReplica;
+	TObjectPtr<AReplicaCharacter> CurrentReplica;
 #pragma endregion Replica
 	
 #pragma region Synchro
@@ -86,44 +79,19 @@ private:
 	float SyncFrequency = 30.0f; 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Synchronization", meta = (AllowPrivateAccess))
-	bool bSyncBoneTransforms = true;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Synchronization", meta = (AllowPrivateAccess))
 	bool bSyncMovementState = true;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Synchronization", meta = (AllowPrivateAccess))
-	bool bSyncEquipmentState = true;
-	
-	// about fade. delete this
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Effects", meta = (AllowPrivateAccess))
-	float PortalFadeSpeed = 2.0f; 
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Effects", meta = (AllowPrivateAccess))
-	bool bHideReplicaDuringPortalTransition = true;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bone Sync", meta = (AllowPrivateAccess))
-	TArray<FName> ImportantBones = {
-		TEXT("spine_01"), TEXT("spine_02"), TEXT("spine_03"),
-		TEXT("head"), TEXT("neck_01"),
-		TEXT("upperarm_l"), TEXT("upperarm_r"),
-		TEXT("lowerarm_l"), TEXT("lowerarm_r"),
-		TEXT("hand_l"), TEXT("hand_r"),
-		TEXT("portalgun_r")
-	};
-	
 	float LastSyncTime;
-	bool bReplicaVisible;
-	float CurrentFadeAlpha;
 #pragma endregion Synchro
 	
 	UPROPERTY()
-	TObjectPtr<class UPlayerMovementComponent> CachedMovementComp;
+	TObjectPtr<class UPlayerMovementComponent> MovementComp;
 	
 	UPROPERTY()
-	TObjectPtr<class UControlComponent> CachedControlComp;
+	TObjectPtr<class UControlComponent> ControlComp;
 	
 	UPROPERTY()
-	TObjectPtr<class UEquipmentComponent> CachedEquipmentComp;
+	TObjectPtr<class UEquipmentComponent> EquipmentComp;
 
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Replica Events")

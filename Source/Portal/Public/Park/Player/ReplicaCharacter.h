@@ -2,8 +2,56 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "ReplicaCharacter.generated.h"
+
+USTRUCT(BlueprintType)
+struct FReplicaAnimationData
+{
+	GENERATED_BODY()
+
+	// Movement Data
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	float MovementSpeed = 0.0f;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	float NormalizedSpeed = 0.0f;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	FVector2D MovementDirection = FVector2D::ZeroVector;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	bool bIsOnGround = true;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	bool bIsJumping = false;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	bool bIsFalling = false;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Movement")
+	float VerticalSpeed = 0.0f;
+	
+	// Equipment Data
+	UPROPERTY(BlueprintReadWrite, Category = "Equipment")
+	bool bHasWeapon = false;
+	
+	// Portal Gun Animation
+	UPROPERTY(BlueprintReadWrite, Category = "Weapon")
+	float WeaponBobIntensity = 0.0f;
+
+	FReplicaAnimationData()
+	{
+		MovementSpeed = 0.0f;
+		NormalizedSpeed = 0.0f;
+		MovementDirection = FVector2D::ZeroVector;
+		bIsOnGround = true;
+		bIsJumping = false;
+		bIsFalling = false;
+		VerticalSpeed = 0.0f;
+		bHasWeapon = false;
+		WeaponBobIntensity = 0.0f;
+	}
+};
 
 UCLASS(BlueprintType, Blueprintable, Category = "Portal Game")
 class PORTAL_API AReplicaCharacter : public ACharacter
@@ -27,100 +75,55 @@ public:
 	void InitializeAsReplica();
 	
 	UFUNCTION(BlueprintCallable, Category = "Replica")
-	void SetReplicaVisibility(bool bVisible, float FadeSpeed = 2.0f);
+	void SetReplicaVisibility(bool bVisible);
 	
 	UFUNCTION(BlueprintPure, Category = "Replica")
 	bool IsReplicaVisible() const { return bReplicaVisible; }
-	
-	UFUNCTION(BlueprintCallable, Category = "Replica")
-	void SetOpacityImmediate(float Opacity);
 #pragma endregion Replica
 	
 #pragma region Anim
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animation Sync")
-	void OnMovementDataUpdated(float MovementSpeed, const FVector2D& Direction, bool bOnGround);
+	void OnAnimationDataUpdated(const FReplicaAnimationData& AnimData);
 	UFUNCTION(BlueprintCallable, Category = "Animation Sync")
-	void UpdateMovementData(float MovementSpeed, const FVector2D& Direction, bool bOnGround);
+	void UpdateAnimationData(const FReplicaAnimationData& AnimData);
 	
-	// temp. portal cant swap equipment
-	UFUNCTION(BlueprintImplementableEvent, Category = "Animation Sync")
-	void OnEquipmentStateChanged(bool bHasWeapon, int32 WeaponType);
-	UFUNCTION(BlueprintCallable, Category = "Animation Sync")
-	void UpdateEquipmentState(bool bHasWeapon, int32 WeaponType = 1);
+	UFUNCTION(BlueprintPure, Category = "Animation Data")
+	const FReplicaAnimationData& GetAnimationData() const { return AnimationData; }
 
-	// Portal에 있던가..? delete
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animation Sync")
 	void OnPortalEffectTriggered(bool bEntering);
-	UFUNCTION(BlueprintCallable, Category = "Portal Effects")
+	UFUNCTION(BlueprintCallable, Category = "Portal Enter")
 	void TriggerPortalEffect(bool bEntering);
 #pragma endregion Anim
 
-protected:
+private:
 #pragma region Replica
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Replica Settings")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
 	bool bDisableCollisionOnSpawn = true;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Replica Settings")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
 	bool bDisableInputOnSpawn = true;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Replica Settings")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
 	bool bDisableMovementOnSpawn = true;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Replica Settings")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
 	bool bEnableShadowCasting = true;
 	
-	//Material Fade.. use? - del
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Visual Effects")
-	FName OpacityParameterName = TEXT("Opacity");
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Visual Effects")
-	float DefaultFadeSpeed = 2.0f;
-
-	// Replica Portal Interaction - del
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Portal Settings")
-	bool bAutoHideDuringPortalTransition = false;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Portal Settings")
-	float PortalTransitionFadeSpeed = 5.0f;
-#pragma endregion Replica
-	
-
-private:
-#pragma region Fade Effects // use..?
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
-	float CurrentOpacity;
-	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
-	float TargetOpacity;
-	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
-	float FadeSpeed;
-	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
-	bool bIsFading;
-#pragma endregion Fade Effects 
-
-#pragma region Replica
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
 	bool bReplicaVisible;
 #pragma endregion Replica
+
 	
 #pragma region Anim
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Animation Cache")
-	float CachedMovementSpeed;
-	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Animation Cache")
-	FVector2D CachedDirection;
-	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Animation Cache")
-	bool bCachedOnGround;
-	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Animation Cache")
-	bool bCachedHasWeapon;
+	FReplicaAnimationData AnimationData;
 #pragma endregion Anim
 
 private:
-	void ProcessFadeEffect(float DeltaTime);
-	void ApplyOpacityToMaterials(float Opacity);
+	UPROPERTY()
+	TObjectPtr<class UReplicaAnimInstance> AnimInstance;
+	
 	void SetupReplicaDefaults();
+	void UpdateAnimInstanceProperties();
 };
