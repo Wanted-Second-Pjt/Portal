@@ -21,12 +21,3 @@ void ANonPortalStaticMeshActor::BeginPlay()
 	
 }
 
-void ANonPortalStaticMeshActor::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (OtherActor->IsA(APortalProjectile::StaticClass()) == bPortal)
-	{
-		// 픽하고 사라지는 이펙트 연출
-	}
-	return;
-}

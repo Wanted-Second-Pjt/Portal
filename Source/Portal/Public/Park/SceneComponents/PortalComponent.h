@@ -24,4 +24,16 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
+	
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetPortal(AActor* InPortal) { this->WeakPortal = InPortal; }
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE void SetPortalDefault(AActor* InPortal) { this->Portal = InPortal; }
+	
+private:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	TWeakObjectPtr<AActor> WeakPortal;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	TObjectPtr<AActor> Portal;
 };

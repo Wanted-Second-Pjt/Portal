@@ -20,5 +20,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) override;
+	UFUNCTION(BlueprintCallable)
+	void Respond(const FHitResult& HitInfo, AActor* Portal);
+
+private:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<AActor> RefPortal = nullptr;
 };

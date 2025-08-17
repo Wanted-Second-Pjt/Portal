@@ -21,7 +21,6 @@ public:
 			return nullptr;
 		}
 		
-		
 		if (Instance == nullptr)
 		{
 			Instance = new IC();
