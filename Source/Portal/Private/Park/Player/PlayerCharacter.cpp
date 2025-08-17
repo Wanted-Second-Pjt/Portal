@@ -14,6 +14,7 @@
 #include "Park/SceneComponents/PortalComponent.h"
 #include "Park/RelatedPhysics/PlayerMovementComponent.h"
 #include "Park/ActorComponents/EquipmentComponent.h"
+#include "Park/ActorComponents/ReplicaSynchroComponent.h"
 
 
 // Sets default values
@@ -30,6 +31,7 @@ APlayerCharacter::APlayerCharacter()
 	ControlComp = Helper::CreateActorComponent<UControlComponent>(this, "ControlComp");
 	EquipmentComp = Helper::CreateActorComponent<UEquipmentComponent>(this, "EquipmentComp");
 	MovementComp = Helper::CreateActorComponent<UPlayerMovementComponent>(this, "MovementComp");
+	ReplicaSynchroComp = Helper::CreateActorComponent<UReplicaSynchroComponent>(this, "ReplicaSynchroComp");
 	
 }
 
@@ -50,14 +52,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{}
 	
 	// ToDelegate in ControlComp.. what is faster?
-	// if (ControlComp->PressedMouseLeft())
-	// {
-	// 	EquipmentComp->NormalAction(true);
-	// }
-	// if (ControlComp->PressedMouseRight())
-	// {
-	// 	EquipmentComp->NormalAction(false);
-	// }
+	if (ControlComp->PressedMouseLeft())
+	{
+		//EquipmentComp->NormalAction(true);
+	}
+	if (ControlComp->PressedMouseRight())
+	{
+		//EquipmentComp->NormalAction(false);
+	}
 	
 }
 

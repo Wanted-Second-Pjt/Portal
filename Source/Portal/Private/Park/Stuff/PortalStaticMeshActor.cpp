@@ -20,14 +20,8 @@ void APortalStaticMeshActor::BeginPlay()
 	
 }
 
-void APortalStaticMeshActor::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void APortalStaticMeshActor::Respond(const FHitResult& HitInfo,  AActor* Portal)
 {
-	if (OtherActor->IsA(APortalProjectile::StaticClass()) == bPortal)
-	{
-		// Portal 생성 로직	
-	}
-	return;
+	
 }
-
 

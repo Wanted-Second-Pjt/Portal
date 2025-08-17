@@ -20,92 +20,92 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
+	void EnterPortal(); // Clamping
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void AddCustomInputVector(FVector WorldVector);
+
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	void Jump();
+
+	UFUNCTION(BlueprintPure, Category = "Movement")
+	bool IsOnGround() const { return bIsOnGround; }
+
+	UFUNCTION(BlueprintPure, Category = "Movement")
+	FVector GetCurrentVelocity() const { return Velocity; }
+
+
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess), Category = "Physics")
-	float TerminalVelocity = 6667.0f;
+	void ApplyGravity(float DeltaTime);
+	
+	void ProcessMovement(float DeltaTime); // 버니홉 지원... 뺄까?
+	
+	void CheckGroundCollision();
+	
+	bool SweepCollision(const FVector& Start, const FVector& End, FHitResult& HitResult);
 
+	FVector CalculateAirMovement(const FVector& InputVector, float DeltaTime);
+	
+	//Accel.. or.. hmm...
+	FVector CalculateGroundMovement(const FVector& InputVector, float DeltaTime);
+	
+	
+	bool TryStepUp(const FHitResult& Hit, const FVector& Delta);
+	
+	void HandleSlope(const FVector& SlopeNormal, float DeltaTime);
+	
+	void ImprovedGroundDetection();
 
-public:
+public:	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess), Category = "Portal Physics")
+	float TerminalVelocity = 1500.0f;
+
+	// if gravity is not exist in GM. default value.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Physics")
+	float GravityForce = 800.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Movement")
+	float MaxWalkSpeed = 320.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Movement") 
+	float MaxAirSpeed = 30.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Movement")
+	float JumpVelocity = 270.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Movement")
+	float Acceleration = 10.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Movement")
+	float Friction = 4.0f; // 마찰력
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Movement")
+	float AirAcceleration = 10.0f; // 버니홉 된다는데..
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Terrain")
+	float MaxStepHeight = 35.0f; // replace to bone(ex.knee) Height
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Terrain")
+	float SlopeLimit = 0.7f; // 0.7f == cos(45degree)
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Portal Terrain")
+	float SlopeFriction = 2.0f; // 경사면 마찰략
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess), Category = "Physics")
 	float PortalTransitionDamping = 0.95f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Physics")
 	float GravityScale;
-
-	/*
-public:
-	UFUNCTION(BlueprintPure, Category="Pawn|Components|CharacterMovement")
-	FVector::FReal GetGravitySpaceZ(const FVector& Vector) const { return Vector.Dot(-GetGravityDirection()); }
-	FVector ProjectToGravityFloor(const FVector& Vector) const { return FVector::VectorPlaneProject(Vector, GetGravityDirection()); }
-	FVector GetGravityDirection() const { return GravityDirection; }
 	
+private:
+	FVector PendingInputVector; // This Frame
+	bool bIsOnGround; 
+	bool bJumpPressed;
+	float GroundCheckDistance = 5.f;
+	FVector LastGroundNormal;
 	
-	UPROPERTY(Category="Character Movement: Gravity", VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	FVector GravityDirection;
-	
-	UPROPERTY(Category="Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
-	float MaxWalkSpeed;
-	UPROPERTY(Category="Character Movement: Flying", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0", ForceUnits="cm/s"))
-	float MaxFlySpeed;
-	UPROPERTY(Category="Character Movement: Jumping / Falling", EditAnywhere, BlueprintReadWrite, meta=(DisplayName="Jump Z Velocity", ClampMin="0", UIMin="0", ForceUnits="cm/s"))
-	float JumpZVelocity;
-	UPROPERTY(Category="Character Movement: Jumping / Falling", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
-	float AirControl;
-	UPROPERTY(Category="Character Movement: Jumping / Falling", EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0", UIMin="0"))
-	float FallingLateralFriction;
-	
-	UPROPERTY(Category="Character Movement: Physics Interaction", EditAnywhere, BlueprintReadWrite, meta=(editcondition = "bEnablePhysicsInteraction"))
-	float StandingDownwardForceScale;
+	bool bOnSlope; 
+	FVector CurrentSlopeNormal; 
+	float LastStepUpTime; // prevent Spam? search it
 
-	UPROPERTY(Category="Character Movement (General Settings)", EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(ClampMin="1", ClampMax="25", UIMin="1", UIMax="25"))
-	int32 MaxSimulationIterations;
-	UPROPERTY(Category="Character Movement (General Settings)", EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(ClampMin="0.0166", ClampMax="0.50", UIMin="0.0166", UIMax="0.50"))
-	float MaxSimulationTimeStep;
 
-	ENGINE_API virtual bool CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit, const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations, bool bMustJump);
-	bool UCharacterMovementComponent::CheckFall(const FFindFloorResult& OldFloor, const FHitResult& Hit, const FVector& Delta, const FVector& OldLocation, float remainingTime, float timeTick, int32 Iterations, bool bMustJump)
-	{
-		if (!HasValidData())
-		{
-			return false;
-		}
-
-		if (bMustJump || CanWalkOffLedges())
-		{
-			HandleWalkingOffLedge(OldFloor.HitResult.ImpactNormal, OldFloor.HitResult.Normal, OldLocation, timeTick);
-			if (IsMovingOnGround())
-			{
-				// If still walking, then fall. If not, assume the user set a different mode they want to keep.
-				StartFalling(Iterations, remainingTime, timeTick, Delta, OldLocation);
-			}
-			return true;
-		}
-		return false;
-	}
-	void UCharacterMovementComponent::StartFalling(int32 Iterations, float remainingTime, float timeTick, const FVector& Delta, const FVector& subLoc)
-	{
-		// start falling 
-		const float DesiredDist = Delta.Size();
-		const float ActualDist = ProjectToGravityFloor(UpdatedComponent->GetComponentLocation() - subLoc).Size();
-		remainingTime = (DesiredDist < UE_KINDA_SMALL_NUMBER)
-						? 0.f
-						: remainingTime + timeTick * (1.f - FMath::Min(1.f,ActualDist/DesiredDist));
-
-		if ( IsMovingOnGround() )
-		{
-			// This is to catch cases where the first frame of PIE is executed, and the
-			// level is not yet visible. In those cases, the player will fall out of the
-			// world... So, don't set MOVE_Falling straight away.
-			if ( !GIsEditor || (GetWorld()->HasBegunPlay() && (GetWorld()->GetTimeSeconds() >= 1.f)) )
-			{
-				SetMovementMode(MOVE_Falling); //default behavior if script didn't change physics
-			}
-			else
-			{
-				// Make sure that the floor check code continues processing during this delay.
-				bForceNextFloorCheck = true;
-			}
-		}
-		StartNewPhysics(remainingTime,Iterations);
-	}
-	*/
 };

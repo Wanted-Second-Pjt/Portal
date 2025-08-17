@@ -82,10 +82,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool PressedSpaceBar() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
 
-	UFUNCTION(BlueprintCallable)
-	void LeftAction();
-	UFUNCTION(BlueprintCallable)
-	void RightAction();
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true", Bitmask, BitmaskEnum = EPressedKeys))

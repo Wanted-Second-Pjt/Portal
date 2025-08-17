@@ -2,8 +2,19 @@
 
 #pragma once
 
+class UCapsuleComponent;
+class UPortalComponent;
+class USkeletalMeshComponent;
+class UCameraComponent;
+class UControlComponent;
+class UEquipmentComponent;
+class UPlayerMovementComponent;
+class UReplicaSynchroComponent;
+
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
+
 #include "PlayerCharacter.generated.h"
 
 UCLASS()
@@ -24,26 +35,47 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 public:
 	FName EquipmentName;
 	
+	UFUNCTION(BlueprintPure, Category = "Components")
+	FORCEINLINE USkeletalMeshComponent* GetSkeletalComp() const { return SkeletalComp; }
+	
+	UFUNCTION(BlueprintPure, Category = "Components")
+	FORCEINLINE UControlComponent* GetControlComp() const { return ControlComp; }
+	
+	UFUNCTION(BlueprintPure, Category = "Components")
+	FORCEINLINE UEquipmentComponent* GetEquipmentComp() const { return EquipmentComp; }
+	
+	UFUNCTION(BlueprintPure, Category = "Components")
+	FORCEINLINE UPlayerMovementComponent* GetMovementComp() const { return MovementComp; }
+	
+	UFUNCTION(BlueprintPure, Category = "Components")
+	FORCEINLINE UReplicaSynchroComponent* GetReplicaSynchroComp() const { return ReplicaSynchroComp; }
+
+	UFUNCTION(BlueprintPure, Category = "Components")
+	FORCEINLINE UPortalComponent* GetPortalComp() { return PortalComp; }
+	
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<class UCapsuleComponent> CapsuleComp;
+	TObjectPtr<UCapsuleComponent> CapsuleComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<class UPortalComponent> PortalComp;
+	TObjectPtr<UPortalComponent> PortalComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<class USkeletalMeshComponent> SkeletalComp;
+	TObjectPtr<USkeletalMeshComponent> SkeletalComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<class UCameraComponent> CameraComp;
+	TObjectPtr<UCameraComponent> CameraComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<class UControlComponent> ControlComp;
+	TObjectPtr<UControlComponent> ControlComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<class UEquipmentComponent> EquipmentComp;
+	TObjectPtr<UEquipmentComponent> EquipmentComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<class UPlayerMovementComponent> MovementComp;
+	TObjectPtr<UPlayerMovementComponent> MovementComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
+	TObjectPtr<UReplicaSynchroComponent> ReplicaSynchroComp;
 	
 };
