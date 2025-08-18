@@ -99,16 +99,16 @@ public:
 private:
 #pragma region Replica
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
-	bool bDisableCollisionOnSpawn = true;
+	bool bDisableCollisionOnSpawn;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
-	bool bDisableInputOnSpawn = true;
+	bool bDisableInputOnSpawn;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
-	bool bDisableMovementOnSpawn = true;
+	bool bDisableMovementOnSpawn;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
-	bool bEnableShadowCasting = true;
+	bool bEnableShadowCasting;
 	
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
 	bool bReplicaVisible;

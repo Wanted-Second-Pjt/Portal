@@ -12,7 +12,11 @@ AReplicaCharacter::AReplicaCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	
-	bReplicaVisible = true;
+	bDisableCollisionOnSpawn = true;
+	bDisableInputOnSpawn = true;
+	bDisableMovementOnSpawn = true;
+	bEnableShadowCasting = true;
+	bReplicaVisible = true;  // debug용
 	AnimationData = FReplicaAnimationData();
 	
 	SetupReplicaDefaults();
