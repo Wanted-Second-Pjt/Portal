@@ -12,7 +12,8 @@ enum class EKeyMap : uint8
 	W = 0, 				
 	A, 				
 	S, 				
-	D, 				
+	D,
+	E,
 	SpaceBar, 		
 	LeftMouseButton,	
 	RightMouseButton
@@ -27,9 +28,10 @@ enum class EPressedKeys : uint8
 	A 						= static_cast<uint8>(1) << 1,
 	S 						= static_cast<uint8>(1) << 2,
 	D 						= static_cast<uint8>(1) << 3,
-	SpaceBar 				= static_cast<uint8>(1) << 4,
-	LeftMouseButton			= static_cast<uint8>(1) << 5,
-	RightMouseButton		= static_cast<uint8>(1) << 6,
+	Enter 					= static_cast<uint8>(1) << 4,
+	SpaceBar 				= static_cast<uint8>(1) << 5,
+	LeftMouseButton			= static_cast<uint8>(1) << 6,
+	RightMouseButton		= static_cast<uint8>(1) << 7,
 };
 FORCEINLINE uint8 operator<<(const bool& L, EKeyMap&& R)
 { return L << static_cast<uint8>(R); }

@@ -29,6 +29,8 @@ void UControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 	check(PlayerController)
 	{ bEnableKeyInput ? Pressed = ReceiveInputs() : Pressed = EPressedKeys::Default; }
+
+	
 	
 	DEBUG_HELPER_PRINT_BYTE(static_cast<uint8>(Pressed));
 }

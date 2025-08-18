@@ -7,6 +7,7 @@
 #include "Components/ArrowComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Park/Player/PlayerCharacter.h"
+#include "PortalCharacter.h"
 
 
 // Sets default values
@@ -39,7 +40,8 @@ void APortalStaticMeshActor::BeginPlay()
 
 void APortalStaticMeshActor::Tick(float DeltaTime)
 {
-	APlayerCharacter* Player = CastChecked<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
+	// Portal Character -> PlayerCharacter in alpha
+	APortalCharacter* Player = CastChecked<APortalCharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
 	if (RefPortal->GetDistanceTo(Player) < 40.0f)
 	{
 		GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
@@ -68,7 +70,7 @@ bool APortalStaticMeshActor::Respond(const FHitResult& HitInfo, AActor* Portal)
 	FVector PortalDirection = PortalArrow->GetForwardVector();
 	FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(PortalDirection, HitInfo.ImpactNormal);
 	FMinimalViewInfo ViewInfo;
-	APlayerCharacter* Player = CastChecked<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
+	APortalCharacter* Player = CastChecked<APortalCharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
 
 	// Camera의 방향과 맞추기 In Beta
 	float Angle = HitInfo.ImpactNormal.Cross(GetActorRightVector()).Dot(PortalArrow->GetUpVector());
