@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BaseStaticMeshActor.h"
+#include "Engine/StaticMeshActor.h"
 #include "PortalStaticMeshActor.generated.h"
 
 UCLASS()
-class PORTAL_API APortalStaticMeshActor : public ABaseStaticMeshActor
+class PORTAL_API APortalStaticMeshActor : public AStaticMeshActor
 {
 	GENERATED_BODY()
 
@@ -18,6 +18,7 @@ public:
 protected:
 	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 
 public:
@@ -34,10 +35,14 @@ private:
 	void ReadWorldStatus();
 	FVector ModifyIfPortalCanMake(const FHitResult& HitInfo, const FVector2D& Extent, float Tolerance = 0.001f) const;
 	
+public:
+	//static FVector PortalExtent;
 
 private:
 	float DegreeToPointInForwardSurface = 0.f;
-	static FVector PortalExtent;
+	
+	UPROPERTY(EditAnywhere)
+	AActor* RefPortal = nullptr;
 	
 	UPROPERTY(EditDefaultsOnly)
 	FMatrix FixedInversedRotationScaleMatrix = FMatrix(ForceInitToZero);

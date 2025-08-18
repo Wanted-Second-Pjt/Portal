@@ -8,14 +8,14 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Park/Player/PlayerCharacter.h"
 
-FVector PortalExtent = FVector();
 
 // Sets default values
 APortalStaticMeshActor::APortalStaticMeshActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	
+	GetStaticMeshComponent()->SetCollisionObjectType(ECC_EngineTraceChannel2);
+	GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 }
 
 void APortalStaticMeshActor::PostInitializeComponents()
@@ -37,12 +37,27 @@ void APortalStaticMeshActor::BeginPlay()
 		//ReadWorldStatus();
 }
 
+void APortalStaticMeshActor::Tick(float DeltaTime)
+{
+	APlayerCharacter* Player = CastChecked<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
+	if (RefPortal->GetDistanceTo(Player) < 40.0f)
+	{
+		GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	}
+	else
+	{
+		GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	}
+	//if (GetDistanceTo(RefPortal) > 40.0f)
+}
+
 
 bool APortalStaticMeshActor::Respond(const FHitResult& HitInfo, AActor* Portal)
 {
 	if (!IsValid(GetStaticMeshComponent()->GetStaticMesh()))
 	{return false;}
-	static FVector PortalExtent =
+	RefPortal = Portal;
+	FVector PortalExtent =
 		Portal->GetComponentByClass<UStaticMeshComponent>()
 		->GetStaticMesh()->GetBounds().BoxExtent;
 	FVector ModifiedLocation = ModifyIfPortalCanMake(HitInfo, FVector2D(PortalExtent.X, PortalExtent.Y));
@@ -57,9 +72,12 @@ bool APortalStaticMeshActor::Respond(const FHitResult& HitInfo, AActor* Portal)
 
 	// Camera의 방향과 맞추기 In Beta
 	float Angle = HitInfo.ImpactNormal.Cross(GetActorRightVector()).Dot(PortalArrow->GetUpVector());
-	NewRotation.Yaw(Angle);
+	//NewRotation.Yaw(Angle);
 	Portal->SetActorLocationAndRotation(ModifiedLocation, NewRotation);
 	// Portal->Activate After Portal Cpp Class In Beta
+
+	
+	PrimaryActorTick.bCanEverTick = true;  //없어지면 꺼지게
 	return true; 
 }
 
