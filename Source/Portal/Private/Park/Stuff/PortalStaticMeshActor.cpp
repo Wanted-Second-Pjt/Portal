@@ -41,15 +41,15 @@ void APortalStaticMeshActor::BeginPlay()
 void APortalStaticMeshActor::Tick(float DeltaTime)
 {
 	// Portal Character -> PlayerCharacter in alpha
-	ACharacter* Player = CastChecked<ACharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
-	if (RefPortal->GetDistanceTo(Player) < 40.0f)
-	{
-		GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	}
-	else
-	{
-		GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	}
+	//ACharacter* Player = CastChecked<ACharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
+	//if (RefPortal->GetDistanceTo(Player) < 40.0f)
+	//{
+	//	GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	//}
+	//else
+	//{
+	//	GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	//}
 	//if (GetDistanceTo(RefPortal) > 40.0f)
 }
 
@@ -70,10 +70,13 @@ bool APortalStaticMeshActor::Respond(const FHitResult& HitInfo, AActor* Portal)
 	FVector PortalDirection = PortalArrow->GetForwardVector();
 	FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(PortalDirection, HitInfo.ImpactNormal);
 	FMinimalViewInfo ViewInfo;
-	ACharacter* Player = CastChecked<ACharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
+	if (ACharacter* Player = CastChecked<ACharacter>(GetWorld()->GetFirstPlayerController()->GetOwner()))
+	{
+		float Angle = HitInfo.ImpactNormal.Cross(Player->GetActorRightVector()).Dot(PortalArrow->GetUpVector());
+		
+	}
 
 	// Camera의 방향과 맞추기 In Beta
-	float Angle = HitInfo.ImpactNormal.Cross(Player->GetActorRightVector()).Dot(PortalArrow->GetUpVector());
 	//NewRotation.Yaw(Angle);
 	Portal->SetActorLocationAndRotation(ModifiedLocation, NewRotation);
 	// Portal->Activate After Portal Cpp Class In Beta

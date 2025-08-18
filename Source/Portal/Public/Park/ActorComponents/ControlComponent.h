@@ -82,7 +82,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool PressedMouseRight() const {return IsPressed(Pressed, EPressedKeys::RightMouseButton);}
 	UFUNCTION(BlueprintCallable)
+	FORCEINLINE bool PressedJump() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE bool PressedInteract() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool PressedSpaceBar() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
+	
 
 	
 public:
