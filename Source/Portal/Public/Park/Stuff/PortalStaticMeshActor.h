@@ -16,14 +16,33 @@ public:
 	APortalStaticMeshActor();
 
 protected:
-	// Called when the game starts or when spawned
+	virtual void PostInitializeComponents() override;
 	virtual void BeginPlay() override;
+
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Respond(const FHitResult& HitInfo, AActor* Portal);
+	FORCEINLINE void LocationUpdate(const FVector& NewLocation)
+	{
+		SetActorLocation(NewLocation);
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	bool Respond(const FHitResult& HitInfo, AActor* Portal);
 
 private:
+	void ReadWorldStatus();
+	FVector ModifyIfPortalCanMake(const FHitResult& HitInfo, const FVector2D& Extent, float Tolerance = 0.001f) const;
+	
+
+private:
+	float DegreeToPointInForwardSurface = 0.f;
+	static FVector PortalExtent;
+	
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<AActor> RefPortal = nullptr;
+	FMatrix FixedInversedRotationScaleMatrix = FMatrix(ForceInitToZero);
+
+	UPROPERTY(EditDefaultsOnly)
+	FMatrix FixedInversedScaleMatrix = FMatrix(ForceInitToZero);
+
 };

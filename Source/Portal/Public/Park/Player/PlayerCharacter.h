@@ -57,6 +57,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Components")
 	FORCEINLINE UPortalComponent* GetPortalComp() { return PortalComp; }
+
+	UFUNCTION(BlueprintPure, Category = "Components")
+	FORCEINLINE UCameraComponent* GetCameraComp() { return CameraComp; }
 	
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))

@@ -53,6 +53,9 @@ struct FReplicaAnimationData
 	}
 };
 
+
+class UReplicaAnimInstance;
+
 UCLASS(BlueprintType, Blueprintable, Category = "Portal Game")
 class PORTAL_API AReplicaCharacter : public ACharacter
 {
@@ -122,7 +125,7 @@ private:
 
 private:
 	UPROPERTY()
-	TObjectPtr<class UReplicaAnimInstance> AnimInstance;
+	TObjectPtr<UReplicaAnimInstance> AnimInstance;
 	
 	void SetupReplicaDefaults();
 	void UpdateAnimInstanceProperties();
