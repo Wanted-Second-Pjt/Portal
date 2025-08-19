@@ -44,4 +44,15 @@ public:
 			return Finder.Class;
 		return nullptr;
 	}
+
+	// Portal mostly Status(Scale, Extent etc) will Not change.
+	static TObjectPtr<AActor> GetPortalFromConstructor(const FString& Path = "/Game/Kang/PortalSystem/BP_Portal.BP_Portal")
+	{
+		ConstructorHelpers::FClassFinder<AActor> Finder(*Path);
+		if (!Finder.Succeeded())
+		{
+			return nullptr;
+		}
+		return Finder.Class->GetDefaultObject<AActor>();
+	}
 };
