@@ -11,7 +11,7 @@ public class Portal : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
-			"PhysicsCore"
+			"PhysicsCore", "UMG"
 		});
 		
 		PrivateDependencyModuleNames.AddRange(new string [] {
