@@ -15,29 +15,37 @@ class PORTAL_API UPortalMenuUserWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+
+	/*
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	class UPortalMenuUserWidget* MenuUserWidget;*/
+	
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* StartButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* QuitButton;
 
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	UFUNCTION(BlueprintCallable)
+	void StartGame();
+
+	UFUNCTION(BlueprintCallable)
+	void QuitGame();
+
+	/*UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* RestartButton;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UButton* ContinueButton;
+	class UButton* ContinueButton;*/
 
 protected:
 	virtual void NativeConstruct() override;
 
 private:
+
+
 	
-	//UFUNCTION()
-	//void Start();
-	//
-	UFUNCTION()
-	void Quit();
-	//
+
 	//UFUNCTION()
 	//void Restart();
 	//

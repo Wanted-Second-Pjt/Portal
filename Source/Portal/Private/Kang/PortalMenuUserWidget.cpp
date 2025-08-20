@@ -4,28 +4,39 @@
 #include "Kang/PortalMenuUserWidget.h"
 
 #include "Components/Button.h"
+#include "Kang/PortalGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+
 
 
 void UPortalMenuUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	QuitButton->OnClicked.AddDynamic(this, &UPortalMenuUserWidget::Quit);
+	StartButton->OnClicked.AddDynamic(this, &UPortalMenuUserWidget::StartGame);
+
+	QuitButton->OnClicked.AddDynamic(this, &UPortalMenuUserWidget::QuitGame);
 
 	
 	/*
-	StartButton->OnClicked.AddDynamic(this, &UPortalMenuUserWidget::Start);
 	RestartButton->OnClicked.AddDynamic(this, &UPortalMenuUserWidget::Restart);
 	ContinueButton->OnClicked.AddDynamic(this, &UPortalMenuUserWidget::Continue);
 	*/
 	
 
-
-	
 }
 
-void UPortalMenuUserWidget::Quit()
+void UPortalMenuUserWidget::StartGame()
 {
-	UKismetSystemLibrary::QuitGame(GetWorld(), GetWorld()->GetFirstPlayerController(), EQuitPreference::Quit, false);
+	if (UPortalGameInstance* GameInstance = GetGameInstance<UPortalGameInstance>())
+	{
+		GameInstance->LoadGame();
+	}
 }
+
+void UPortalMenuUserWidget::QuitGame()
+{
+	UKismetSystemLibrary::QuitGame(this, nullptr, EQuitPreference::Quit, true);
+}
+
