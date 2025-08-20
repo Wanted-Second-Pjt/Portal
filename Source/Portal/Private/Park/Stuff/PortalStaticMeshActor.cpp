@@ -19,38 +19,12 @@ APortalStaticMeshActor::APortalStaticMeshActor()
 	GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 }
 
-void APortalStaticMeshActor::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	if ((GetWorld() && GetWorld()->HasBegunPlay()) == false)
-	{
-		return;
-	}
-
-	//ReadWorldStatus();
-}
 
 void APortalStaticMeshActor::BeginPlay()
 {
 	Super::BeginPlay();
 	//if (FixedInversedRotationScaleMatrix == FMatrix(ForceInit))
 		//ReadWorldStatus();
-}
-
-void APortalStaticMeshActor::Tick(float DeltaTime)
-{
-	// Portal Character -> PlayerCharacter in alpha
-	//ACharacter* Player = CastChecked<ACharacter>(GetWorld()->GetFirstPlayerController()->GetOwner());
-	//if (RefPortal->GetDistanceTo(Player) < 40.0f)
-	//{
-	//	GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	//}
-	//else
-	//{
-	//	GetStaticMeshComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	//}
-	//if (GetDistanceTo(RefPortal) > 40.0f)
 }
 
 

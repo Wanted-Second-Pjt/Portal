@@ -19,6 +19,7 @@ enum class EKeyMap : uint8
 	RightMouseButton
 };
 
+// Enhanced Input이 하드웨어에서 그대로 받아오기 때문에 
 //https://learn.microsoft.com/ko-kr/dotnet/api/system.flagsattribute?view=net-5.0
 UENUM(meta = (BitFlags, UseEnumValuesAsMaskVasluesInEditor = "true"))
 enum class EPressedKeys : uint8
@@ -70,6 +71,8 @@ public:
 
 	FORCEINLINE void SetController(APlayerController* NewController) { PlayerController = NewController; }
 
+	FORCEINLINE void EnableInput(const bool& bInput) {bEnableKeyInput = bInput;}
+	
 	UFUNCTION(BlueprintCallable)
 	FVector2D GetDirection();
 	UFUNCTION(BlueprintCallable)
