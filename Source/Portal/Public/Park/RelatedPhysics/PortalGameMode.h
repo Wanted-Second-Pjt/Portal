@@ -19,7 +19,7 @@ public:
 
 private:
 	UFUNCTION()
-	void SetupSourceEnginePhysics() const;
+	void SetupSourceEnginePhysics(class UPhysicsSettings*& PhysicsSettings) const;
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = Physics)

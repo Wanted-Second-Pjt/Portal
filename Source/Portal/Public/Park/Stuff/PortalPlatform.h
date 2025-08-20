@@ -29,16 +29,15 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UFUNCTION()
-	void ReadInversedSRTMatrix();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UStaticMeshComponent> MeshComp;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FTransform InversedTransform;
 
 protected:
-	static UStaticMeshComponent* PortalMesh;
+	static TObjectPtr<AActor> Portal;
 	static const float SurfaceTolerance;
 
 	UPROPERTY(EditDefaultsOnly)
