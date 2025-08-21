@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Park/RelatedPhysics/PortalGameMode.h"
+#include "PortalPauseWidget.h"
+
 #include "PortalGameInstance.generated.h"
 
 /**
@@ -21,6 +23,25 @@ public:
 	void LoadMenu();
 
 	UFUNCTION(BlueprintCallable)
-	void LoadGame();
+	void LoadGame(int32 Level);
+
+	UFUNCTION(BlueprintCallable)
+	void PauseGame();
+
+	UFUNCTION(BlueprintCallable)
+	void ContinueGame();
+
+	UFUNCTION(BlueprintCallable)
+	void StartGame();
+
+	UFUNCTION(BlueprintCallable)
+	void QuitGame();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CurrentLevel;
+
 	
+	UPROPERTY()
+	UPortalPauseWidget* MenuWidget;
+
 };

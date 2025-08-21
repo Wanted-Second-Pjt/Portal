@@ -26,12 +26,6 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* QuitButton;
 
-	UFUNCTION(BlueprintCallable)
-	void StartGame();
-
-	UFUNCTION(BlueprintCallable)
-	void QuitGame();
-
 	/*UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* RestartButton;
 
@@ -42,16 +36,10 @@ protected:
 	virtual void NativeConstruct() override;
 
 private:
-
-
 	
-
 	//UFUNCTION()
 	//void Restart();
 	//
 	//UFUNCTION()
 	//void Continue();
-
-
-	
 };
