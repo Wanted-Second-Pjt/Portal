@@ -26,10 +26,12 @@ public:
 	void LoadGame(int32 Level);
 
 	UFUNCTION(BlueprintCallable)
-	void PauseGame();
+	void TogglePauseGame();
 
+	/*
 	UFUNCTION(BlueprintCallable)
 	void ContinueGame();
+	*/
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
@@ -41,7 +43,14 @@ public:
 	int32 CurrentLevel;
 
 	
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UPortalPauseWidget> MenuWidgetFactory; // assign your BP in editor
+
 	UPROPERTY()
 	UPortalPauseWidget* MenuWidget;
+
+
 
 };
