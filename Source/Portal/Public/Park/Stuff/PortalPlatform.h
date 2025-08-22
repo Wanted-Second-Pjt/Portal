@@ -24,10 +24,10 @@ public:
 	bool CanPlacePortal(const FVector& HitLocation, const FVector& HitNormal);
 
 	UFUNCTION(BlueprintCallable, Category="Portal")
-	void SpawnPortal(const bool& CanEnter, AActor*& Portal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector);
+	void SpawnPortal(const bool& CanEnter, AActor* InPortal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector);
 
 protected:
-	void Facing(const FVector& LocalPoint, const FVector& LocalNormal);
+	//void Facing(const FVector& LocalPoint, const FVector& LocalNormal);
 #pragma endregion PortalPlacement
 
 #pragma region Tiling
@@ -108,6 +108,7 @@ protected:
 private:
 	
 	static TObjectPtr<AActor> Portal;
+	static TSubclassOf<AActor> PortalClass;
 	const static float EdgeMargin;
 	static const float SurfaceTolerance;
 #pragma endregion PortalPlacement

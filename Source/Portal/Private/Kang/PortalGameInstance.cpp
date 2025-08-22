@@ -12,5 +12,5 @@ void UPortalGameInstance::LoadMenu()
 void UPortalGameInstance::LoadGame()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("GameMap"), true);
-	UGameplayStatics::
+	
 }
