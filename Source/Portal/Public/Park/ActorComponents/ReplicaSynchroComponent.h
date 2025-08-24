@@ -54,6 +54,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Portal")
 	void SetupPortalCamera(class USceneCaptureComponent2D* PortalCamera);
+	
 #pragma endregion Replica
 	
 private:

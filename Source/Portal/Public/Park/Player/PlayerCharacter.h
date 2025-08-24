@@ -60,6 +60,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Components")
 	FORCEINLINE UCameraComponent* GetCameraComp() { return CameraComp; }
+
+protected:
+	void SetupCamera();
 	
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))

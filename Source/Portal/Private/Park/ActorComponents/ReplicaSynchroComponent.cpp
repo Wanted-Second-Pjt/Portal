@@ -149,18 +149,16 @@ void UReplicaSynchroComponent::SetupPortalCamera(USceneCaptureComponent2D* Porta
 		return;
 	}
 	
-	// Portal Cam only render Replica
-	PortalCamera->ShowOnlyActors.Empty();
-	PortalCamera->ShowOnlyActors.Add(CurrentReplica);
 	
+	// Replica Can't be Rendered by Portal Cam
 	if (APlayerCharacter* Player = GetPlayerCharacter())
 	{
-		PortalCamera->HiddenActors.AddUnique(Player);
+		PortalCamera->HiddenActors.AddUnique(GetCurrentReplica());
 	}
-	PortalCamera->bCaptureEveryFrame = true;
-	PortalCamera->bCaptureOnMovement = true;
+	//PortalCamera->bCaptureEveryFrame = true;
+	//PortalCamera->bCaptureOnMovement = true;
 	
-	SetReplicaVisibility(true);
+	//SetReplicaVisibility(true);
 	SyncToReplica();
 }
 

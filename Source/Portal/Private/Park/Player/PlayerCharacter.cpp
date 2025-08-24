@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Kang/PortalGameInstance.h"
 
 #include "Park/ActorComponents/ControlComponent.h"
 #include "Park/SceneComponents/PortalComponent.h"
@@ -26,7 +27,15 @@ APlayerCharacter::APlayerCharacter()
 	CapsuleComp = Helper::CreateSceneComponent<UCapsuleComponent>(this, "CapsuleComp");
 	PortalComp = Helper::CreateSceneComponent<UPortalComponent>(this, "PortalComp", CapsuleComp);
 	SkeletalComp = Helper::CreateSceneComponent<USkeletalMeshComponent>(this, "SkeletalMeshComp", CapsuleComp);
-	CameraComp = Helper::CreateSceneComponent<UCameraComponent>(this, "CameraComp", SkeletalComp);
+	SkeletalComp->SetSkeletalMeshAsset(Helper::GetAssetFromConstructor<USkeletalMesh>(
+		"/Game/Park/Character/ControlRig/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"
+	));
+	if (CameraComp = Helper::CreateSceneComponent<UCameraComponent>(this, "CameraComp", SkeletalComp);
+		IsValid(CameraComp))
+	{
+		SetupCamera();
+	}
+	
 
 	ControlComp = Helper::CreateActorComponent<UControlComponent>(this, "ControlComp");
 	EquipmentComp = Helper::CreateActorComponent<UEquipmentComponent>(this, "EquipmentComp");
@@ -47,19 +56,31 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (ControlComp->Pause())
+	{
+		UPortalGameInstance* PGI = Cast<UPortalGameInstance>(GetGameInstance());
+		if (IsValid(PGI))
+		{
+			PGI->TogglePauseGame();
+		}
+	}
+
+#pragma region Input
 	MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
 	if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
-	{}
-	
-	// ToDelegate in ControlComp.. what is faster?
-	if (ControlComp->PressedMouseLeft())
 	{
-		//EquipmentComp->NormalAction(true);
+		MovementComp->Jump();
 	}
-	if (ControlComp->PressedMouseRight())
+	
+	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
+	{
+		//EquipmentComp->EquipmentAction(true);
+	}
+	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
 	{
 		//EquipmentComp->NormalAction(false);
 	}
+#pragma endregion Input
 	
 }
 
@@ -68,6 +89,11 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	ControlComp->SetController(CastChecked<APlayerController>(GetController()));
+}
+
+void APlayerCharacter::SetupCamera()
+{
+	CameraComp->SetFieldOfView(90.f);
 }
 
 

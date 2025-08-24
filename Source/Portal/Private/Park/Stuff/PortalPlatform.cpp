@@ -94,7 +94,6 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 	{
 		if (FMath::Abs(LocalHitNormal.X) > 0.9f)
 		{
-			
 			FaceSize = { LocalBoxExtent.Y, LocalBoxExtent.Z };
 			HitPoint = { LocalHitLocation.Y, LocalHitLocation.Z };
 			ValidRange = FaceSize - FVector2D(PortalExtent.X + EdgeMargin, PortalExtent.Y + EdgeMargin);
@@ -143,22 +142,30 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 	// }
 
 	// Pull inside
-	FVector NewLocalLocation = LocalHitNormal * (LocalHitNormal.X * LocalBoxExtent.X + LocalHitNormal.Y * LocalBoxExtent.Y + LocalHitNormal.Z * LocalBoxExtent.Z);
-	
-	if (LocalHitNormal.X > 0.9f) { NewLocalLocation.Y += AdjustPoint.X; NewLocalLocation.Z += AdjustPoint.Y; }
-	else if (LocalHitNormal.X < -0.9f) { NewLocalLocation.Y -= AdjustPoint.X; NewLocalLocation.Z -= AdjustPoint.Y; }
-	else if (LocalHitNormal.Y > 0.9f) { NewLocalLocation.X += AdjustPoint.X; NewLocalLocation.Z += AdjustPoint.Y; }
-	else if (LocalHitNormal.Y < -0.9f) { NewLocalLocation.X -= AdjustPoint.X; NewLocalLocation.Z -= AdjustPoint.Y; }
-	else if (LocalHitNormal.Z > 0.9f) { NewLocalLocation.X += AdjustPoint.X; NewLocalLocation.Y += AdjustPoint.Y; }
-	else if (LocalHitNormal.Z < -0.9f) { NewLocalLocation.X -= AdjustPoint.X; NewLocalLocation.Y -= AdjustPoint.Y; }
-	else NewLocalLocation = FVector::ZeroVector;
+	FVector NewLocalLocation;
+	if (FMath::Abs(LocalHitNormal.X) > 0.9f)
+	{
+		NewLocalLocation = FVector(LocalHitNormal.X * LocalBoxExtent.X, AdjustPoint.X, AdjustPoint.Y);
+	}
+	else if (FMath::Abs(LocalHitNormal.Y) > 0.9f)
+	{
+		NewLocalLocation = FVector(AdjustPoint.X, LocalHitNormal.Y * LocalBoxExtent.Y,AdjustPoint.Y);
+	}
+	else if (FMath::Abs(LocalHitNormal.Z) > 0.9f)
+	{
+		NewLocalLocation = FVector(AdjustPoint.X, AdjustPoint.Y, LocalHitNormal.Z * LocalBoxExtent.Z);
+	}
+	else
+	{
+		NewLocalLocation = FVector::ZeroVector;
+	}
 	FVector NewWorldLocation = GetActorTransform().TransformPosition(NewLocalLocation);
 	DEBUG_HELPER_PRINT_VECTOR(NewWorldLocation);
 	
 	
 	if (InPortal)
 	{
-		DEBUG_HELPER_PRINT_LINE(__LINE__);
+		DEBUG_HELPER_PRINT_INSTANCE();
 		InPortal->SetActorLocationAndRotation(NewWorldLocation, NewRotator);
 		return;
 	}

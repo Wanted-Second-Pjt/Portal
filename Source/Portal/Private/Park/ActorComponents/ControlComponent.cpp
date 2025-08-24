@@ -28,10 +28,15 @@ void UControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	check(PlayerController)
-	{ bEnableKeyInput ? Pressed = ReceiveInputs() : Pressed = EPressedKeys::Default; }
+	{
+		bEnableKeyInput ? Pressed = ReceiveInputs() : Pressed = EPressedKeys::Default;
+		float DeltaX, DeltaY;
+		PlayerController->GetInputMouseDelta(DeltaX, DeltaY);
+		PlayerController->AddYawInput(DeltaX);
+		PlayerController->AddPitchInput(DeltaY);
 
-	
-	
+	}
+
 	DEBUG_HELPER_PRINT_BYTE(static_cast<uint8>(Pressed));
 }
 
@@ -42,6 +47,7 @@ EPressedKeys UControlComponent::ReceiveInputs() const
 		(PlayerController->IsInputKeyDown(EKeys::A) << EKeyMap::A) |
 		(PlayerController->IsInputKeyDown(EKeys::S) << EKeyMap::S) |
 		(PlayerController->IsInputKeyDown(EKeys::D) << EKeyMap::D) |
+		(PlayerController->IsInputKeyDown(EKeys::E) << EKeyMap::E) |
 		(PlayerController->IsInputKeyDown(EKeys::SpaceBar) << EKeyMap::SpaceBar) |
 		(PlayerController->IsInputKeyDown(EKeys::LeftMouseButton) << EKeyMap::LeftMouseButton) |
 		(PlayerController->IsInputKeyDown(EKeys::RightMouseButton) << EKeyMap::RightMouseButton)
@@ -51,7 +57,7 @@ EPressedKeys UControlComponent::ReceiveInputs() const
 FVector2D UControlComponent::GetDirection()
 {
 	FVector2D Direction;
-	Direction.X = PlayerController->IsInputKeyDown(EKeys::W) - PlayerController->IsInputKeyDown(EKeys::S);
-	Direction.Y = PlayerController->IsInputKeyDown(EKeys::D) - PlayerController->IsInputKeyDown(EKeys::A);
+	Direction.X = IsPressed(Pressed, EPressedKeys::W) - IsPressed(Pressed , EPressedKeys::S);
+	Direction.Y = IsPressed(Pressed, EPressedKeys::D) - IsPressed(Pressed , EPressedKeys::A);
 	return Direction.GetSafeNormal();
 }

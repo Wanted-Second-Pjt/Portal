@@ -29,7 +29,7 @@ enum class EPressedKeys : uint8
 	A 						= static_cast<uint8>(1) << 1,
 	S 						= static_cast<uint8>(1) << 2,
 	D 						= static_cast<uint8>(1) << 3,
-	Enter 					= static_cast<uint8>(1) << 4,
+	Interaction				= static_cast<uint8>(1) << 4,
 	SpaceBar 				= static_cast<uint8>(1) << 5,
 	LeftMouseButton			= static_cast<uint8>(1) << 6,
 	RightMouseButton		= static_cast<uint8>(1) << 7,
@@ -78,7 +78,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool Moving() const
 	{return IsPressed(Pressed, (EPressedKeys::W | EPressedKeys::A | EPressedKeys::S | EPressedKeys::D));}
-	
+	FORCEINLINE bool Pause() const
+	{return PlayerController->IsInputKeyDown(EKeys::P);}
 	
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool PressedMouseLeft() const {return IsPressed(Pressed, EPressedKeys::LeftMouseButton);}
