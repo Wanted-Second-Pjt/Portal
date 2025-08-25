@@ -23,35 +23,7 @@ APortalGameMode::APortalGameMode()
 
 void APortalGameMode::BeginPlay()
 {
-	Super::BeginPlay();
-	
-	if (TObjectPtr<APlayerController> PlayerController = GetWorld()->GetFirstPlayerController())
-	{
-		PlayerController->SetInputMode(FInputModeGameOnly());
-		PlayerController->SetShowMouseCursor(false);
-		Player = Cast<APlayerCharacter>(PlayerController->GetPawn());
-		if (IsValid(Player))
-		{
-			//Player->GetControlComp()->EnableInput(true);
-		}
-		else
-		{
-			return;
-		}
-		
-		#pragma region Pause
-		//bPaused = false;
-		//if (!PauseMenuWidget || !IsValid(PauseMenuWidget))
-		//{
-		//	PauseMenuWidget = CreateWidget<UPortalPauseWidget>(PlayerController, UPortalPauseWidget::StaticClass());
-		//}
-		//EnableInput(PlayerController);
-		//if (UInputComponent* EnabledInputComp = InputComponent)
-		//{
-		//	EnabledInputComp->BindKey(EKeys::P, IE_Pressed, this, &APortalGameMode::TogglePause);
-		//}
-		#pragma endregion Pause
-	}
+	Super::BeginPlay();	
 	
 	if (UPhysicsSettings* PhysicsSettings = UPhysicsSettings::Get())
 	{

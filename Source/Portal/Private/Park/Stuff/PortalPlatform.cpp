@@ -43,9 +43,9 @@ void APortalPlatform::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	//if () Player-Portal 일정 거리 이하로 오면
-	//MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	//MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	if (GetWorld()->GetFirstPlayerController()->GetPawn()) //Player-Portal 일정 거리 이하로 오면
+	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 }
 
 bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& HitNormal)
@@ -57,8 +57,8 @@ bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& 
 	}
 	
 	static const UStaticMeshComponent* PortalMeshComp = Portal->GetComponentByClass<UStaticMeshComponent>();
-	static FVector PortalExtent = PortalMeshComp->GetPlacementExtent().GetBox().GetExtent();
-   
+	static FVector PortalExtent = InversedTransform.InverseTransformVector(PortalMeshComp->GetPlacementExtent().GetBox().GetExtent());
+	
 	float MaxPortalDimension = FMath::Max(PortalExtent.X, PortalExtent.Y, PortalExtent.Z);
 	FVector LocalNormal = GetActorTransform().InverseTransformVectorNoScale(HitNormal);
 
@@ -75,18 +75,26 @@ bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& 
 	{
 	   MinFaceDimension = FMath::Min(LocalBoxExtent.X, LocalBoxExtent.Y);
 	}
-	DEBUG_HELPER_PRINT_BOOL(MaxPortalDimension + (EdgeMargin * 2) <= MinFaceDimension);
-	return MaxPortalDimension + (EdgeMargin * 2) <= MinFaceDimension;
+	DEBUG_HELPER_PRINT_BOOL(MaxPortalDimension + (EdgeMargin * 2) >= MinFaceDimension);
+	return MaxPortalDimension + (EdgeMargin * 2) >= MinFaceDimension;
 }
 
 void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector)
 {
-	if (!CanEnter)
+	if (!CanEnter || !InPortal)
 		return;
 	
-	FVector PortalUp = FVector::CrossProduct(HitNormal, CamRightVector).GetSafeNormal();
-	FVector PortalRight = FVector::CrossProduct(HitNormal, PortalUp).GetSafeNormal();
-	FVector2D PortalExtent = FVector2D(InPortal->GetComponentByClass<UStaticMeshComponent>()->GetPlacementExtent().GetBox().GetExtent());
+	FVector PortalUp = FVector::CrossProduct(HitNormal, CamRightVector);
+	FVector PortalRight = FVector::CrossProduct(HitNormal, PortalUp);
+	FRotator NRotator = FMatrix(HitNormal, PortalRight, PortalUp, FVector::ZeroVector).Rotator();
+	//InPortal->SetActorRotation(NRotator);
+	InPortal->SetActorRelativeRotation(NRotator);
+	InPortal->SetActorLocation(HitLocation + HitNormal * 5.f);
+	
+	return;
+	
+	FVector PortalExtent = InPortal->GetComponentByClass<UStaticMeshComponent>()->GetPlacementExtent().GetBox().GetExtent();
+	FVector2D LocalPortalExtent = FVector2D(InversedTransform.InverseTransformVector(PortalExtent));
 
 	FVector LocalHitLocation = InversedTransform.TransformPosition(HitLocation);
 	FVector LocalHitNormal = InversedTransform.TransformVectorNoScale(HitNormal);
@@ -96,21 +104,21 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 		{
 			FaceSize = { LocalBoxExtent.Y, LocalBoxExtent.Z };
 			HitPoint = { LocalHitLocation.Y, LocalHitLocation.Z };
-			ValidRange = FaceSize - FVector2D(PortalExtent.X + EdgeMargin, PortalExtent.Y + EdgeMargin);
+			ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
 			AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
 		}
 		else if (FMath::Abs(LocalHitNormal.Y) > 0.9f)
 		{
 			FaceSize = { LocalBoxExtent.X, LocalBoxExtent.Z };
 			HitPoint = { LocalHitLocation.X, LocalHitLocation.Z };
-			ValidRange = FaceSize - FVector2D(PortalExtent.X + EdgeMargin, PortalExtent.Y + EdgeMargin);
+			ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
 			AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
 		}
 		else
 		{
 			FaceSize = { LocalBoxExtent.X, LocalBoxExtent.Y };
 			HitPoint = { LocalHitLocation.X, LocalHitLocation.Y };
-			ValidRange = FaceSize - FVector2D(PortalExtent.X + EdgeMargin, PortalExtent.Y + EdgeMargin);
+			ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
 			AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
 		}
 	}
@@ -120,6 +128,7 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 	{
 		if (InPortal)
 		{
+			DEBUG_HELPER_PRINT_LINE();
 			InPortal->SetActorLocationAndRotation(HitLocation, NewRotator);
 		}
 		return;

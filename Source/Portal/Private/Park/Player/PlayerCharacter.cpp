@@ -25,16 +25,34 @@ APlayerCharacter::APlayerCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 	CapsuleComp = Helper::CreateSceneComponent<UCapsuleComponent>(this, "CapsuleComp");
-	PortalComp = Helper::CreateSceneComponent<UPortalComponent>(this, "PortalComp", CapsuleComp);
-	SkeletalComp = Helper::CreateSceneComponent<USkeletalMeshComponent>(this, "SkeletalMeshComp", CapsuleComp);
-	SkeletalComp->SetSkeletalMeshAsset(Helper::GetAssetFromConstructor<USkeletalMesh>(
-		"/Game/Park/Character/ControlRig/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"
-	));
-	if (CameraComp = Helper::CreateSceneComponent<UCameraComponent>(this, "CameraComp", SkeletalComp);
+	SetRootComponent(CapsuleComp);
+	CapsuleComp->SetCapsuleHalfHeight(100.f);
+	CapsuleComp->SetCapsuleRadius(40.f);
+	CapsuleComp->SetLineThickness(1.0f);
+
+	if (SkeletalComp = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComp");
+		IsValid(SkeletalComp))
+	{
+		SkeletalComp->SetSkeletalMeshAsset(Helper::GetAssetFromConstructor<USkeletalMesh>(
+			"/Game/Park/Character/ControlRig/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"
+		));
+		SkeletalComp->SetupAttachment(CapsuleComp);
+		SkeletalComp->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
+	}
+	
+	if (CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
 		IsValid(CameraComp))
 	{
 		SetupCamera();
+		CameraComp->SetupAttachment(SkeletalComp, FName("CameraSocket"));
 	}
+
+	if (TSubclassOf<UAnimInstance> TempAnimInstance = Helper::GetClassFromConstructor<UAnimInstance>(TEXT("/Game/Park/Character/ControlRig/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C")))		
+	{
+		SkeletalComp->SetAnimInstanceClass(TempAnimInstance);
+	}
+	PortalComp = CreateDefaultSubobject<UPortalComponent>("PortalComp");
+	PortalComp->SetupAttachment(CameraComp);
 	
 
 	ControlComp = Helper::CreateActorComponent<UControlComponent>(this, "ControlComp");
@@ -64,6 +82,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			PGI->TogglePauseGame();
 		}
 	}
+
+	
 	
 	if (ControlComp->GetEnableInput())
 	{
@@ -100,16 +120,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	ControlComp->SetController(CastChecked<APlayerController>(GetController()));
+	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+	ControlComp->SetController(PlayerController);
+	PlayerController->HiddenActors.Add(this);
 }
 
 void APlayerCharacter::SetupCamera()
 {
 	CameraComp->SetFieldOfView(90.f);
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		PlayerController->HiddenActors.Add(this);
-	}
 }
 
 

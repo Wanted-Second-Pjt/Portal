@@ -89,18 +89,35 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool PressedMouseRight() const {return IsPressedOnce(Pressed, PrevPressed, EPressedKeys::RightMouseButton);}
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool PressedInteract() const {return IsPressedOnce(Pressed, PrevPressed, EPressedKeys::SpaceBar);}
+	FORCEINLINE bool PressedInteract() const {return IsPressedOnce(Pressed, PrevPressed, EPressedKeys::Interaction);}
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool PressedSpaceBar() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
 	
-
+	UFUNCTION()
+	void ApplyMouseInput();
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true", Bitmask, BitmaskEnum = EPressedKeys))
 	EPressedKeys Pressed = EPressedKeys::Default;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true", Bitmask, BitmaskEnum = EPressedKeys))
-	EPressedKeys PrevPressed = EPressedKeys::Default;	
+	EPressedKeys PrevPressed = EPressedKeys::Default;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MouseSensitivityX = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MouseSensitivityY = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	bool bInvertMouseY = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MaxPitchAngle = 89.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+	float MinPitchAngle = -89.0f;
+
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -108,4 +125,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool bEnableKeyInput = false;
+
+	
 };

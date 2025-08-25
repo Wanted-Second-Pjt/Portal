@@ -79,11 +79,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Replica")
 	void SetReplicaVisibility(bool bVisible);
-
-	FORCEINLINE void SetSkeletalMesh(USkeletalMesh* SkeletalMesh) const
-	{
-		SkeletalMeshComp->SetSkeletalMesh(SkeletalMesh);
-	}
 	
 	UFUNCTION(BlueprintPure, Category = "Replica")
 	bool IsReplicaVisible() const { return bReplicaVisible; }
@@ -131,11 +126,8 @@ protected:
 	FReplicaAnimationData AnimationData;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Anim Instance Ref")
-	UReplicaAnimInstance* ReplicaAnimInstance;
+	TObjectPtr<UReplicaAnimInstance> ReplicaAnimInstance;
 #pragma endregion Anim
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	USkeletalMeshComponent* SkeletalMeshComp;
 	
 	
 private:	

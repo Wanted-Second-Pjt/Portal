@@ -16,7 +16,7 @@ AReplicaCharacter::AReplicaCharacter()
 	bDisableInputOnSpawn = true;
 	bDisableMovementOnSpawn = true;
 	bEnableShadowCasting = true;
-	bReplicaVisible = true;  // debug용
+	bReplicaVisible = false;  // debug용
 	AnimationData = FReplicaAnimationData();
 	
 	SetupReplicaDefaults();
@@ -25,7 +25,6 @@ AReplicaCharacter::AReplicaCharacter()
 void AReplicaCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 	
 	InitializeAsReplica();
 }
@@ -90,8 +89,6 @@ void AReplicaCharacter::InitializeAsReplica()
 		MeshComp->SetComponentTickEnabled(true);
 		MeshComp->bTickInEditor = false;
 	}
-
-	Tags.AddUnique(TEXT("Replica"));
 	Tags.AddUnique(TEXT("PortalReplica"));
 
 	SetActorLabel(TEXT("PortalReplica"));
@@ -102,6 +99,7 @@ void AReplicaCharacter::SetReplicaVisibility(bool bVisible)
 	bReplicaVisible = bVisible;
 	SetActorHiddenInGame(!bVisible);
 }
+
 
 
 UAnimInstance* AReplicaCharacter::GetAnimInstance()
@@ -153,6 +151,7 @@ void AReplicaCharacter::SetupReplicaDefaults()
 {
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
+		
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		
 		MeshComp->SetSimulatePhysics(false);
@@ -162,6 +161,7 @@ void AReplicaCharacter::SetupReplicaDefaults()
 		// update only bones
 		MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 
+		GetMesh()->SetAnimInstanceClass(UReplicaAnimInstance::StaticClass());
 		ReplicaAnimInstance = Cast<UReplicaAnimInstance>(GetMesh()->GetAnimInstance());
 	}
 	

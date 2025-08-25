@@ -47,9 +47,23 @@ void UReplicaSynchroComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	{
 		return;
 	}
-	
-	// 30 FPS hard Coding. need to modify
-	if (float CurrentTime = GetWorld()->GetTimeSeconds(); CurrentTime - LastSyncTime > (1.0f / SyncFrequency))
+
+	/*
+	if (!IsValid(CurrentReplica->GetMesh()->GetSkeletalMeshAsset()))
+	{
+		CurrentReplica->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
+		if (USkeletalMeshComponent* ReplicaMesh = CurrentReplica->GetMesh())
+		{
+			ReplicaMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			ReplicaMesh->SetSimulatePhysics(false);
+			ReplicaMesh->SetCastShadow(true);
+		}
+		CurrentReplica->DisableInput(nullptr);
+		SetupPortalCamera();
+		OnReplicaCreated.Broadcast(CurrentReplica);
+	}
+	*/
+	if (float CurrentTime = GetWorld()->GetTimeSeconds(); CurrentTime - LastSyncTime > (1.0f / SyncFrequency))// 30 FPS hard Coding. need to modify
 	{
 		SyncToReplica();
 		LastSyncTime = CurrentTime;
@@ -81,17 +95,20 @@ void UReplicaSynchroComponent::CreateReplica()
 	
 	CurrentReplica = GetWorld()->SpawnActor<AReplicaCharacter>(SpawnLocation, SpawnRotation, SpawnParams);
 	
-	if (CurrentReplica)
+	if (IsValid(CurrentReplica))
 	{
 		CurrentReplica->DisableInput(nullptr);
-		CurrentReplica->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
-		if (USkeletalMeshComponent* ReplicaMesh = CurrentReplica->GetMesh())
+		if (!IsValid(CurrentReplica->GetMesh()->GetSkeletalMeshAsset()))
 		{
-			ReplicaMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			ReplicaMesh->SetSimulatePhysics(false);
-			ReplicaMesh->SetCastShadow(true);
+			CurrentReplica->GetMesh()->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
+			if (USkeletalMeshComponent* ReplicaMesh = CurrentReplica->GetMesh())
+			{
+				ReplicaMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				ReplicaMesh->SetSimulatePhysics(false);
+				ReplicaMesh->SetCastShadow(true);
+			}
 		}
-
+		
 		SetupPortalCamera();
 		
 		SyncToReplica();
@@ -167,8 +184,6 @@ void UReplicaSynchroComponent::SetupPortalCamera()
 			}
 		}
 	}
-
-	
 	
 	//SetReplicaVisibility(true);
 	SyncToReplica();

@@ -22,8 +22,10 @@ public:
 
 	void EnterPortal(); // Clamping
 
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void AddCustomInputVector(FVector WorldVector);
+	virtual void AddInputVector(FVector WorldVector, bool bForce = false) override;
+	
+
+	//virtual void AddInputVector(FVector WorldVector) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void Jump();

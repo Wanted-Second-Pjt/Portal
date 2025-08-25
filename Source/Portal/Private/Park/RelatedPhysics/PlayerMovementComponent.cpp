@@ -82,11 +82,6 @@ void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
-void UPlayerMovementComponent::AddCustomInputVector(FVector WorldVector)
-{
-	PendingInputVector += WorldVector;
-}
-
 void UPlayerMovementComponent::Jump()
 {
 	if (bIsOnGround)
@@ -107,9 +102,12 @@ void UPlayerMovementComponent::ApplyGravity(float DeltaTime)
 		}
 		else
 		{
-			
 			Velocity.Z -= GravityForce * GravityScale * DeltaTime;
 		}
+	}
+	else if (Velocity.Z < 0.f)
+	{
+		Velocity.Z = 0.f;
 	}
 }
 
@@ -258,6 +256,12 @@ void UPlayerMovementComponent::EnterPortal()
 {
 	Velocity *= PortalTransitionDamping;
 	DEBUG_HELPER_PRINT_LINE();  // check enter portal
+}
+
+void UPlayerMovementComponent::AddInputVector(FVector WorldVector, bool bForce)
+{
+	PendingInputVector = WorldVector;
+	
 }
 
 bool UPlayerMovementComponent::TryStepUp(const FHitResult& Hit, const FVector& Delta)
