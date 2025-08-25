@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Kang/PortalGameInstance.h"
 
 #include "Park/ActorComponents/ControlComponent.h"
 #include "Park/SceneComponents/PortalComponent.h"
@@ -26,7 +27,15 @@ APlayerCharacter::APlayerCharacter()
 	CapsuleComp = Helper::CreateSceneComponent<UCapsuleComponent>(this, "CapsuleComp");
 	PortalComp = Helper::CreateSceneComponent<UPortalComponent>(this, "PortalComp", CapsuleComp);
 	SkeletalComp = Helper::CreateSceneComponent<USkeletalMeshComponent>(this, "SkeletalMeshComp", CapsuleComp);
-	CameraComp = Helper::CreateSceneComponent<UCameraComponent>(this, "CameraComp", SkeletalComp);
+	SkeletalComp->SetSkeletalMeshAsset(Helper::GetAssetFromConstructor<USkeletalMesh>(
+		"/Game/Park/Character/ControlRig/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"
+	));
+	if (CameraComp = Helper::CreateSceneComponent<UCameraComponent>(this, "CameraComp", SkeletalComp);
+		IsValid(CameraComp))
+	{
+		SetupCamera();
+	}
+	
 
 	ControlComp = Helper::CreateActorComponent<UControlComponent>(this, "ControlComp");
 	EquipmentComp = Helper::CreateActorComponent<UEquipmentComponent>(this, "EquipmentComp");
@@ -39,27 +48,51 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
-	if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
-	{}
 	
-	// ToDelegate in ControlComp.. what is faster?
-	if (ControlComp->PressedMouseLeft())
+	if (ControlComp->Pause())
 	{
-		//EquipmentComp->NormalAction(true);
+		UPortalGameInstance* PGI = Cast<UPortalGameInstance>(GetGameInstance());
+		if (IsValid(PGI))
+		{
+			PGI->TogglePauseGame();
+		}
 	}
-	if (ControlComp->PressedMouseRight())
+	
+	if (ControlComp->GetEnableInput())
 	{
-		//EquipmentComp->NormalAction(false);
+		#pragma region Movement
+		MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
+		if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
+		{
+			MovementComp->Jump();
+		}
+		#pragma endregion Movement
+
+		#pragma region Able Portal
+		bool bEnablePortal = false;
+		if (LIKELY(IsValid(PortalComp) && IsValid(CameraComp)))
+		{
+			bEnablePortal = PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
+			
+		}
+		if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
+		{
+			
+		}
+		if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
+		{
+			//EquipmentComp->NormalAction(false);
+		}
+		#pragma endregion Able Portal
 	}
+	
 	
 }
 
@@ -68,6 +101,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	ControlComp->SetController(CastChecked<APlayerController>(GetController()));
+}
+
+void APlayerCharacter::SetupCamera()
+{
+	CameraComp->SetFieldOfView(90.f);
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		PlayerController->HiddenActors.Add(this);
+	}
 }
 
 

@@ -3,7 +3,7 @@
 
 #include "Park/ActorComponents/EquipmentComponent.h"
 #include "Park/Player/PlayerCharacter.h"
-
+#include "PortalWeaponComponent.h"
 
 
 // Sets default values for this component's properties

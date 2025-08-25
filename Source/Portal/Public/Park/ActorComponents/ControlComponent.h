@@ -29,7 +29,7 @@ enum class EPressedKeys : uint8
 	A 						= static_cast<uint8>(1) << 1,
 	S 						= static_cast<uint8>(1) << 2,
 	D 						= static_cast<uint8>(1) << 3,
-	Enter 					= static_cast<uint8>(1) << 4,
+	Interaction				= static_cast<uint8>(1) << 4,
 	SpaceBar 				= static_cast<uint8>(1) << 5,
 	LeftMouseButton			= static_cast<uint8>(1) << 6,
 	RightMouseButton		= static_cast<uint8>(1) << 7,
@@ -44,6 +44,8 @@ FORCEINLINE EPressedKeys operator&(EPressedKeys L, EPressedKeys R)
 { return static_cast<EPressedKeys>(static_cast<uint8>(L) & static_cast<uint8>(R)); }
 FORCEINLINE bool IsPressed(const EPressedKeys& BitMask, EPressedKeys&& BitFlag)
 { return (BitMask & BitFlag) > EPressedKeys::Default; }
+FORCEINLINE bool IsPressedOnce(const EPressedKeys& BitMask, const EPressedKeys& PrevBitMask, EPressedKeys&& BitFlag)
+{ return static_cast<bool>(BitMask & BitFlag) ^ static_cast<bool>(PrevBitMask & BitFlag); }
 
 
 
@@ -62,7 +64,7 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
-	EPressedKeys ReceiveInputs() const;
+	EPressedKeys ReceiveInputs();
 
 public:
 	// Called every frame
@@ -71,31 +73,34 @@ public:
 
 	FORCEINLINE void SetController(APlayerController* NewController) { PlayerController = NewController; }
 
-	FORCEINLINE void EnableInput(const bool& bInput) {bEnableKeyInput = bInput;}
+	FORCEINLINE bool GetEnableInput() const { return bEnableKeyInput; }
+	FORCEINLINE void SetEnableInput(const bool& bInput) {bEnableKeyInput = bInput;}
 	
 	UFUNCTION(BlueprintCallable)
 	FVector2D GetDirection();
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool Moving() const
 	{return IsPressed(Pressed, (EPressedKeys::W | EPressedKeys::A | EPressedKeys::S | EPressedKeys::D));}
+	FORCEINLINE bool Pause() const
+	{return PlayerController->IsInputKeyDown(EKeys::P);}
 	
-	
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool PressedMouseLeft() const {return IsPressed(Pressed, EPressedKeys::LeftMouseButton);}
+	FORCEINLINE bool PressedMouseLeft() const {return IsPressedOnce(Pressed, PrevPressed, EPressedKeys::LeftMouseButton);}
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool PressedMouseRight() const {return IsPressed(Pressed, EPressedKeys::RightMouseButton);}
+	FORCEINLINE bool PressedMouseRight() const {return IsPressedOnce(Pressed, PrevPressed, EPressedKeys::RightMouseButton);}
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool PressedJump() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool PressedInteract() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
+	FORCEINLINE bool PressedInteract() const {return IsPressedOnce(Pressed, PrevPressed, EPressedKeys::SpaceBar);}
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool PressedSpaceBar() const {return IsPressed(Pressed, EPressedKeys::SpaceBar);}
 	
 
 	
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true", Bitmask, BitmaskEnum = EPressedKeys))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true", Bitmask, BitmaskEnum = EPressedKeys))
 	EPressedKeys Pressed = EPressedKeys::Default;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true", Bitmask, BitmaskEnum = EPressedKeys))
+	EPressedKeys PrevPressed = EPressedKeys::Default;	
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

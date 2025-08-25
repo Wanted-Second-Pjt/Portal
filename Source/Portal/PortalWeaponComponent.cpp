@@ -3,6 +3,7 @@
 
 #include "PortalWeaponComponent.h"
 #include "PortalCharacter.h"
+#include "Park/Player/PlayerCharacter.h"
 #include "PortalProjectile.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
@@ -26,7 +27,16 @@ UPortalWeaponComponent::UPortalWeaponComponent()
 
 void UPortalWeaponComponent::Fire()
 {
-	if (Character == nullptr || Character->GetController() == nullptr)
+	APawn* Player = nullptr;
+	if (Character != nullptr)
+	{
+		Player = Character;
+	}
+	else if (PlayerPawn != nullptr)
+	{
+		Player = PlayerPawn;
+	}
+	else
 	{
 		return;
 	}
@@ -37,7 +47,7 @@ void UPortalWeaponComponent::Fire()
 		UWorld* const World = GetWorld();
 		if (World != nullptr && CanFire == true)
 		{
-			APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
+			APlayerController* PlayerController = Cast<APlayerController>(Player->GetController());
 			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
 			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
@@ -88,6 +98,39 @@ bool UPortalWeaponComponent::AttachWeapon(APortalCharacter* TargetCharacter)
 
 	// Set up action bindings
 	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			// Set the priority of the mapping to 1, so that it overrides the Jump action with the Fire action when using touch input
+			Subsystem->AddMappingContext(FireMappingContext, 1);
+		}
+
+		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
+		{
+			// Fire
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UPortalWeaponComponent::Fire);
+		}
+	}
+
+	return true;
+}
+
+bool UPortalWeaponComponent::AttachWeaponToOurPlayer(APlayerCharacter* Player)
+{
+	PlayerPawn = Player;
+
+	// Check that the character is valid, and has no weapon component yet
+	if (PlayerPawn == nullptr || PlayerPawn->GetInstanceComponents().FindItemByClass<UPortalWeaponComponent>())
+	{
+		return false;
+	}
+
+	// Attach the weapon to the First Person Character
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
+	AttachToComponent(PlayerPawn->GetSkeletalComp(), AttachmentRules, FName(TEXT("GripPoint")));
+
+	// Set up action bindings
+	if (APlayerController* PlayerController = Cast<APlayerController>(PlayerPawn->GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{

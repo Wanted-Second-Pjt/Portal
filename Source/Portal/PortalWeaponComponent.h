@@ -7,6 +7,7 @@
 #include "PortalWeaponComponent.generated.h"
 
 class APortalCharacter;
+class APlayerCharacter;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PORTAL_API UPortalWeaponComponent : public USkeletalMeshComponent
@@ -47,6 +48,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	bool AttachWeapon(APortalCharacter* TargetCharacter);
 
+	UFUNCTION(BlueprintCallable, Category="Weapon")
+	bool AttachWeaponToOurPlayer(APlayerCharacter* Player);
+
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")
 	void Fire();
@@ -70,4 +74,5 @@ protected:
 private:
 	/** The Character holding this weapon*/
 	APortalCharacter* Character;
+	APlayerCharacter* PlayerPawn;
 };

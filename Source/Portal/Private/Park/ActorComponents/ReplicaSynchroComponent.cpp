@@ -1,6 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Park/ActorComponents/ReplicaSynchroComponent.h"
+
+#include "EngineUtils.h"
 #include "Park/Player/PlayerCharacter.h"
 #include "Park/ActorComponents/ControlComponent.h"
 #include "Park/ActorComponents/EquipmentComponent.h"
@@ -82,13 +84,15 @@ void UReplicaSynchroComponent::CreateReplica()
 	if (CurrentReplica)
 	{
 		CurrentReplica->DisableInput(nullptr);
-		
+		CurrentReplica->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
 		if (USkeletalMeshComponent* ReplicaMesh = CurrentReplica->GetMesh())
 		{
 			ReplicaMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			ReplicaMesh->SetSimulatePhysics(false);
 			ReplicaMesh->SetCastShadow(true);
 		}
+
+		SetupPortalCamera();
 		
 		SyncToReplica();
 		
@@ -142,25 +146,31 @@ void UReplicaSynchroComponent::SetReplicaVisibility(bool bVisible)
 	}
 }
 
-void UReplicaSynchroComponent::SetupPortalCamera(USceneCaptureComponent2D* PortalCamera)
+void UReplicaSynchroComponent::SetupPortalCamera()
 {
-	if (!PortalCamera || !CurrentReplica || !IsValid(CurrentReplica))
+	if (!CurrentReplica || !IsValid(CurrentReplica))
 	{
 		return;
 	}
-	
-	// Portal Cam only render Replica
-	PortalCamera->ShowOnlyActors.Empty();
-	PortalCamera->ShowOnlyActors.Add(CurrentReplica);
-	
-	if (APlayerCharacter* Player = GetPlayerCharacter())
+	for (TActorIterator<AActor> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
 	{
-		PortalCamera->HiddenActors.AddUnique(Player);
+		AActor* Actor = *ActorIterator;
+		if (USceneCaptureComponent2D* SceneCapture = Actor->FindComponentByClass<USceneCaptureComponent2D>())
+		{
+			SceneCapture->HiddenActors.Empty();
+			if (APlayerCharacter* Player = GetPlayerCharacter())
+			{
+				SceneCapture->HiddenActors.AddUnique(CurrentReplica);
+				// Replica Can't be Rendered by Portal Cam
+				//PortalCamera->bCaptureEveryFrame = true;
+				//PortalCamera->bCaptureOnMovement = true;
+			}
+		}
 	}
-	PortalCamera->bCaptureEveryFrame = true;
-	PortalCamera->bCaptureOnMovement = true;
+
 	
-	SetReplicaVisibility(true);
+	
+	//SetReplicaVisibility(true);
 	SyncToReplica();
 }
 
@@ -191,9 +201,9 @@ void UReplicaSynchroComponent::SyncMovementData()
 	
 	AnimData.WeaponBobIntensity = FMath::Clamp(AnimData.MovementSpeed / MovementComp->MaxWalkSpeed, 0.0f, 1.0f);
 	
-	if (AReplicaCharacter* ReplicaChar = Cast<AReplicaCharacter>(CurrentReplica))
+	if (IsValid(CurrentReplica->GetAnimInstance()))
 	{
-		ReplicaChar->UpdateAnimationData(AnimData);
+		CurrentReplica->UpdateAnimationData(AnimData);
 	}
 }
 

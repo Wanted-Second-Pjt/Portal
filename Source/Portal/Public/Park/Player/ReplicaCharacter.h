@@ -79,12 +79,19 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Replica")
 	void SetReplicaVisibility(bool bVisible);
+
+	FORCEINLINE void SetSkeletalMesh(USkeletalMesh* SkeletalMesh) const
+	{
+		SkeletalMeshComp->SetSkeletalMesh(SkeletalMesh);
+	}
 	
 	UFUNCTION(BlueprintPure, Category = "Replica")
 	bool IsReplicaVisible() const { return bReplicaVisible; }
 #pragma endregion Replica
 	
 #pragma region Anim
+	UFUNCTION(BlueprintCallable, Category = "Anim")
+	UAnimInstance* GetAnimInstance();
 	UFUNCTION(BlueprintImplementableEvent, Category = "Animation Sync")
 	void OnAnimationDataUpdated(const FReplicaAnimationData& AnimData);
 	UFUNCTION(BlueprintCallable, Category = "Animation Sync")
@@ -118,15 +125,20 @@ private:
 #pragma endregion Replica
 
 	
+protected:
 #pragma region Anim
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Animation Cache")
 	FReplicaAnimationData AnimationData;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Anim Instance Ref")
+	UReplicaAnimInstance* ReplicaAnimInstance;
 #pragma endregion Anim
 
-private:
-	UPROPERTY()
-	TObjectPtr<UReplicaAnimInstance> AnimInstance;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	USkeletalMeshComponent* SkeletalMeshComp;
 	
+	
+private:	
 	void SetupReplicaDefaults();
 	void UpdateAnimInstanceProperties();
 };
