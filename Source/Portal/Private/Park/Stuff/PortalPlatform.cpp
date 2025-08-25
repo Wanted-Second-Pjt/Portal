@@ -125,22 +125,6 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 		return;
 	}
 
-	// bool bCanPortalDirectly = true;
-	// TArray<FVector> PortalVertices = {
-	// 	HitLocation + PortalRight * PortalExtent.X + PortalUp * PortalExtent.Y,
-	// 	HitLocation - PortalRight * PortalExtent.X + PortalUp * PortalExtent.Y,
-	// 	HitLocation + PortalRight * PortalExtent.X - PortalUp * PortalExtent.Y,
-	// 	HitLocation - PortalRight * PortalExtent.X - PortalUp * PortalExtent.Y
-	// };
-	// for (const FVector& Vertex : PortalVertices)
-	// {
-	// 	FVector LocalVertex = InversedTransform.TransformPosition(Vertex);
-	// 	if (!FBox(-LocalBoxExtent + EdgeMargin, LocalBoxExtent - EdgeMargin).IsInside(LocalVertex))
-	// 	{
-	// 		bCanPortalDirectly = false;
-	// 	}
-	// }
-
 	// Pull inside
 	FVector NewLocalLocation;
 	if (FMath::Abs(LocalHitNormal.X) > 0.9f)

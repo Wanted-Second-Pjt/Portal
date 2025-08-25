@@ -49,7 +49,7 @@ public:
 	bool AttachWeapon(APortalCharacter* TargetCharacter);
 
 	UFUNCTION(BlueprintCallable, Category="Weapon")
-	bool AttachWeapon(APlayerCharacter* Player);
+	bool AttachWeaponToOurPlayer(APlayerCharacter* Player);
 
 	/** Make the weapon Fire a Projectile */
 	UFUNCTION(BlueprintCallable, Category="Weapon")

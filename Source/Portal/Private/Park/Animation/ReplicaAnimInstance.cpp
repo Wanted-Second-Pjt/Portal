@@ -1,9 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Park/Animation/ReplicaAnimInstance.h"
+#include "Park/Player/PlayerCharacter.h"
 #include "Park/Player/ReplicaCharacter.h"
 #include "GameFramework/Character.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Park/ActorComponents/ReplicaSynchroComponent.h"
 
 UReplicaAnimInstance::UReplicaAnimInstance()
 {
@@ -27,6 +29,12 @@ void UReplicaAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (!OwningReplicaCharacter)
 	{
 		OwningReplicaCharacter = Cast<AReplicaCharacter>(GetOwningActor());
+		if (!OwningReplicaCharacter)
+		{
+			OwningReplicaCharacter =
+				Cast<APlayerCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn())
+				->GetReplicaSynchroComp()->GetCurrentReplica();
+		}
 	}
 	
 	if (OwningReplicaCharacter && IsValid(OwningReplicaCharacter))

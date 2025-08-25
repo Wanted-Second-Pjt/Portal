@@ -26,7 +26,6 @@ void AReplicaCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	AnimInstance = CreateDefaultSubobject<UReplicaAnimInstance>(TEXT("ReplicaAnimInstance"));
 	
 	InitializeAsReplica();
 }
@@ -105,6 +104,11 @@ void AReplicaCharacter::SetReplicaVisibility(bool bVisible)
 }
 
 
+UAnimInstance* AReplicaCharacter::GetAnimInstance()
+{
+	return ReplicaAnimInstance;
+}
+
 void AReplicaCharacter::UpdateAnimationData(const FReplicaAnimationData& AnimData)
 {
 	AnimationData = AnimData;
@@ -122,14 +126,15 @@ void AReplicaCharacter::TriggerPortalEffect(bool bEntering)
 
 void AReplicaCharacter::UpdateAnimInstanceProperties()
 {
-	if (!AnimInstance || !IsValid(AnimInstance))
+	
+	if (!GetMesh()->GetAnimInstance() || !IsValid(GetMesh()->GetAnimInstance()))
 	{
 		return;
 	}
 	
-	if (AnimInstance)
+	if (IsValid(ReplicaAnimInstance))
 	{
-		AnimInstance->UpdateAnimationData(
+		ReplicaAnimInstance->UpdateAnimationData(
 			AnimationData.MovementSpeed,
 			AnimationData.NormalizedSpeed,
 			AnimationData.MovementDirection,
@@ -156,6 +161,8 @@ void AReplicaCharacter::SetupReplicaDefaults()
 		
 		// update only bones
 		MeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+
+		ReplicaAnimInstance = Cast<UReplicaAnimInstance>(GetMesh()->GetAnimInstance());
 	}
 	
 	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())

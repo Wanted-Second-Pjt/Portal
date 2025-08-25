@@ -41,7 +41,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = Pause)
 	bool bPaused = true;  // first toggle in BeginPlay 
 	
-	UPROPERTY(meta=(BindWidget), Category = Pause)
+	UPROPERTY(VisibleAnywhere, meta=(BindWidget), Category = Pause)
 	TObjectPtr<class UPortalPauseWidget> PauseMenuWidget;
 };
 

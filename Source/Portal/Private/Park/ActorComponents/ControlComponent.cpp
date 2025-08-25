@@ -40,8 +40,9 @@ void UControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	DEBUG_HELPER_PRINT_BYTE(static_cast<uint8>(Pressed));
 }
 
-EPressedKeys UControlComponent::ReceiveInputs() const
+EPressedKeys UControlComponent::ReceiveInputs()
 {
+	PrevPressed = Pressed;
 	return static_cast<EPressedKeys>(
 		(PlayerController->IsInputKeyDown(EKeys::W) << EKeyMap::W) |
 		(PlayerController->IsInputKeyDown(EKeys::A) << EKeyMap::A) |

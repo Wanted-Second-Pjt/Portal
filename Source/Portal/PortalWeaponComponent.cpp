@@ -115,7 +115,7 @@ bool UPortalWeaponComponent::AttachWeapon(APortalCharacter* TargetCharacter)
 	return true;
 }
 
-bool UPortalWeaponComponent::AttachWeapon(APlayerCharacter* Player)
+bool UPortalWeaponComponent::AttachWeaponToOurPlayer(APlayerCharacter* Player)
 {
 	PlayerPawn = Player;
 

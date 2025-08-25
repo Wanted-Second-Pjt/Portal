@@ -14,10 +14,10 @@ APortalGameMode::APortalGameMode()
 	: Super()
 {
 	// set default pawn class to our Blueprinted character
-	//static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_FirstPersonCharacter"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_FirstPersonCharacter"));
 	
-	//DefaultPawnClass = PlayerPawnClassFinder.Class;
-	DefaultPawnClass = APlayerCharacter::StaticClass();  
+	DefaultPawnClass = PlayerPawnClassFinder.Class;
+	//DefaultPawnClass = APlayerCharacter::StaticClass();  
 	
 }
 
@@ -32,14 +32,14 @@ void APortalGameMode::BeginPlay()
 		Player = Cast<APlayerCharacter>(PlayerController->GetPawn());
 		if (IsValid(Player))
 		{
-			Player->GetControlComp()->EnableInput(true);
+			//Player->GetControlComp()->EnableInput(true);
 		}
 		else
 		{
 			return;
 		}
 		
-	#pragma region Pause
+		#pragma region Pause
 		//bPaused = false;
 		//if (!PauseMenuWidget || !IsValid(PauseMenuWidget))
 		//{
@@ -50,7 +50,7 @@ void APortalGameMode::BeginPlay()
 		//{
 		//	EnabledInputComp->BindKey(EKeys::P, IE_Pressed, this, &APortalGameMode::TogglePause);
 		//}
-	#pragma endregion Pause
+		#pragma endregion Pause
 	}
 	
 	if (UPhysicsSettings* PhysicsSettings = UPhysicsSettings::Get())
@@ -58,12 +58,12 @@ void APortalGameMode::BeginPlay()
 		SetupSourceEnginePhysics(PhysicsSettings);
 	}
 	
-	if (static IConsoleVariable* LumenGI = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Lumen.DiffuseIndirect.Allow"));)
+	if (static IConsoleVariable* LumenGI = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Lumen.DiffuseIndirect.Allow")))
 	{
 		LumenGI->Set(0);
 	}
 	
-	if (static IConsoleVariable* LumenReflections = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Lumen.Reflections.Allow"));)
+	if (static IConsoleVariable* LumenReflections = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Lumen.Reflections.Allow")))
 	{
 		LumenReflections->Set(0);
 	}
@@ -102,8 +102,9 @@ void APortalGameMode::TogglePause()
 
 		PlayerController->SetPause(bPaused);
 		PlayerController->SetShowMouseCursor(bPaused);
-		PlayerController->SetInputMode(bPaused ? FInputModeUIOnly() : FInputModeGameOnly());
-		Player->GetControlComp()->EnableInput(!bPaused);
+		bPaused ? PlayerController->SetInputMode(FInputModeUIOnly())
+			: PlayerController->SetInputMode(FInputModeGameOnly());
+		Player->GetControlComp()->SetEnableInput(!bPaused);
 		if (IsValid(PauseMenuWidget))
 		{
 			bPaused ? PauseMenuWidget->AddToViewport() : PauseMenuWidget->RemoveFromParent();

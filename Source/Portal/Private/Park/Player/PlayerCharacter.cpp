@@ -48,14 +48,14 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 }
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	if (ControlComp->Pause())
 	{
 		UPortalGameInstance* PGI = Cast<UPortalGameInstance>(GetGameInstance());
@@ -64,23 +64,35 @@ void APlayerCharacter::Tick(float DeltaTime)
 			PGI->TogglePauseGame();
 		}
 	}
-
-#pragma region Input
-	MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
-	if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
+	
+	if (ControlComp->GetEnableInput())
 	{
-		MovementComp->Jump();
+		#pragma region Movement
+		MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
+		if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
+		{
+			MovementComp->Jump();
+		}
+		#pragma endregion Movement
+
+		#pragma region Able Portal
+		bool bEnablePortal = false;
+		if (LIKELY(IsValid(PortalComp) && IsValid(CameraComp)))
+		{
+			bEnablePortal = PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
+			
+		}
+		if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
+		{
+			
+		}
+		if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
+		{
+			//EquipmentComp->NormalAction(false);
+		}
+		#pragma endregion Able Portal
 	}
 	
-	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
-	{
-		//EquipmentComp->EquipmentAction(true);
-	}
-	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
-	{
-		//EquipmentComp->NormalAction(false);
-	}
-#pragma endregion Input
 	
 }
 
@@ -94,6 +106,10 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::SetupCamera()
 {
 	CameraComp->SetFieldOfView(90.f);
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		PlayerController->HiddenActors.Add(this);
+	}
 }
 
 

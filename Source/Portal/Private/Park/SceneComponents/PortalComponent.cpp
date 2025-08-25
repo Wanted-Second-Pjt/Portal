@@ -3,33 +3,41 @@
 
 #include "Park/SceneComponents/PortalComponent.h"
 
+#include "MovieSceneFwd.h"
+#include "Park/Stuff/PortalPlatform.h"
+//#include "Park/"
 
-// Sets default values for this component's properties
+
 UPortalComponent::UPortalComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+	PrimaryComponentTick.bCanEverTick = false;
+	Params.AddIgnoredActor(GetOwner());
 }
 
-
-// Called when the game starts
 void UPortalComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
 }
 
-
-// Called every frame
-void UPortalComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	FHitResult HitResult;
 
-	// ...
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		StartPos,
+		EndPos,
+		ECC_Visibility,
+		Params
+	);
+
+	if (APortalPlatform* Platform = Cast<APortalPlatform>(HitResult.GetActor());
+		bHit && IsValid(Platform))
+	{
+		return Platform->CanPlacePortal(HitResult.ImpactPoint, HitResult.ImpactNormal);
+	}
+	return false;
 }
+
 

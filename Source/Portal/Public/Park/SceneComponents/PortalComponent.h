@@ -6,6 +6,8 @@
 #include "Components/SceneComponent.h"
 #include "PortalComponent.generated.h"
 
+class UCameraComponent;
+class APortalPlatform;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PORTAL_API UPortalComponent : public USceneComponent
@@ -20,15 +22,17 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
-	                           FActorComponentTickFunction* ThisTickFunction) override;
+public:	
+	UFUNCTION(BlueprintCallable, Category="Check")
+	bool GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance = 5000.f);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category="Enter")
 	FORCEINLINE void SetPortal(AActor* InPortal) { this->WeakPortal = InPortal; }
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetPortalDefault(AActor* InPortal) { this->Portal = InPortal; }
+
+protected:
+	FCollisionQueryParams Params;
 	
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))

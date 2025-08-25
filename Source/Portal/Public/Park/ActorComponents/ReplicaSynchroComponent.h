@@ -53,7 +53,7 @@ public:
 	void SetReplicaVisibility(bool bVisible);
 	
 	UFUNCTION(BlueprintCallable, Category = "Portal")
-	void SetupPortalCamera(class USceneCaptureComponent2D* PortalCamera);
+	void SetupPortalCamera();
 	
 #pragma endregion Replica
 	
