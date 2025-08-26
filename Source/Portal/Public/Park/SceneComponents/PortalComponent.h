@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class APortalPlatform;
+class UInGameWidget;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PORTAL_API UPortalComponent : public USceneComponent
@@ -33,6 +34,9 @@ public:
 
 protected:
 	FCollisionQueryParams Params;
+
+	UPROPERTY(EditAnywhere)
+	UInGameWidget* AimWidget;
 	
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))

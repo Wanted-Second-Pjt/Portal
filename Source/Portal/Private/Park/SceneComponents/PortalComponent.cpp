@@ -4,6 +4,7 @@
 #include "Park/SceneComponents/PortalComponent.h"
 
 #include "MovieSceneFwd.h"
+#include "Park/Widget/InGameWidget.h"
 #include "Park/Stuff/PortalPlatform.h"
 //#include "Park/"
 
@@ -12,12 +13,15 @@ UPortalComponent::UPortalComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	Params.AddIgnoredActor(GetOwner());
+
+	
+	AimWidget = CreateWidget<UInGameWidget>(Cast<APlayerController>(GetOwner()->GetInstigatorController()), UInGameWidget::StaticClass(), "AimWidget");
 }
 
 void UPortalComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
+	AimWidget->AddToPlayerScreen();
 }
 
 bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance)
@@ -35,8 +39,14 @@ bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const F
 	if (APortalPlatform* Platform = Cast<APortalPlatform>(HitResult.GetActor());
 		bHit && IsValid(Platform))
 	{
-		return Platform->CanPlacePortal(HitResult.ImpactPoint, HitResult.ImpactNormal);
+		const bool bCanPlace = Platform->CanPlacePortal(HitResult.ImpactPoint, HitResult.ImpactNormal);
+		AimWidget->SetEnableOrange(bCanPlace);
+		AimWidget->SetEnableBlue(bCanPlace);
+		return bCanPlace;
 	}
+	
+	AimWidget->SetEnableOrange(false);
+	AimWidget->SetEnableBlue(false);
 	return false;
 }
 
