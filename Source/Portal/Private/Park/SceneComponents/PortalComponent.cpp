@@ -14,14 +14,16 @@ UPortalComponent::UPortalComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	Params.AddIgnoredActor(GetOwner());
 
-	
-	AimWidget = CreateWidget<UInGameWidget>(Cast<APlayerController>(GetOwner()->GetInstigatorController()), UInGameWidget::StaticClass(), "AimWidget");
 }
 
 void UPortalComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	AimWidget->AddToPlayerScreen();
+	if (APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()))
+	{
+		AimWidget = CreateWidget<UInGameWidget>(PC, UInGameWidget::StaticClass(), "AimWidget");		
+		AimWidget->AddToPlayerScreen();
+	}
 }
 
 bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance)
@@ -40,13 +42,18 @@ bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const F
 		bHit && IsValid(Platform))
 	{
 		const bool bCanPlace = Platform->CanPlacePortal(HitResult.ImpactPoint, HitResult.ImpactNormal);
-		AimWidget->SetEnableOrange(bCanPlace);
-		AimWidget->SetEnableBlue(bCanPlace);
+		if (IsValid(AimWidget))
+		{
+			AimWidget->SetEnableOrange(bCanPlace);
+			AimWidget->SetEnableBlue(bCanPlace);
+		}
 		return bCanPlace;
 	}
-	
-	AimWidget->SetEnableOrange(false);
-	AimWidget->SetEnableBlue(false);
+	if (IsValid(AimWidget))
+	{
+		AimWidget->SetEnableOrange(false);
+		AimWidget->SetEnableBlue(false);
+	}
 	return false;
 }
 

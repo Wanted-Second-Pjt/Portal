@@ -10,6 +10,7 @@ class UControlComponent;
 class UEquipmentComponent;
 class UPlayerMovementComponent;
 class UReplicaSynchroComponent;
+class UPortalWeaponComponent;
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
@@ -73,6 +74,8 @@ private:
 	TObjectPtr<USkeletalMeshComponent> SkeletalComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UCameraComponent> CameraComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	TObjectPtr<UPortalWeaponComponent> WeaponComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UControlComponent> ControlComp;

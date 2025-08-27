@@ -10,6 +10,7 @@
 #include "Park/Player/ReplicaCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Kismet/GameplayStatics.h"
 
 UReplicaSynchroComponent::UReplicaSynchroComponent()
 {
@@ -169,16 +170,17 @@ void UReplicaSynchroComponent::SetupPortalCamera()
 	{
 		return;
 	}
-	for (TActorIterator<AActor> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
+	TArray<AActor*> Portals;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName(), Portals);
+	for (AActor* Portal : Portals)
 	{
-		AActor* Actor = *ActorIterator;
-		if (USceneCaptureComponent2D* SceneCapture = Actor->FindComponentByClass<USceneCaptureComponent2D>())
+		if (USceneCaptureComponent2D* SceneCapture = Portal->FindComponentByClass<USceneCaptureComponent2D>())
 		{
 			SceneCapture->HiddenActors.Empty();
 			if (APlayerCharacter* Player = GetPlayerCharacter())
 			{
 				SceneCapture->HiddenActors.AddUnique(CurrentReplica);
-				// Replica Can't be Rendered by Portal Cam
+				// Replica wouldn't be Rendered by Portal Cam
 				//PortalCamera->bCaptureEveryFrame = true;
 				//PortalCamera->bCaptureOnMovement = true;
 			}
