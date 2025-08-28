@@ -3,17 +3,18 @@
 #pragma once
 
 class UCapsuleComponent;
-class UPortalComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
-class UControlComponent;
-class UEquipmentComponent;
-class UPlayerMovementComponent;
-class UReplicaSynchroComponent;
-class UPortalWeaponComponent;
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
+#include "PortalWeaponComponent.h"
+#include "Park/ActorComponents/ControlComponent.h"
+#include "Park/SceneComponents/PortalComponent.h"
+#include "Park/RelatedPhysics/PlayerMovementComponent.h"
+#include "Park/ActorComponents/EquipmentComponent.h"
+#include "Park/ActorComponents/ReplicaSynchroComponent.h"
 
 
 #include "PlayerCharacter.generated.h"

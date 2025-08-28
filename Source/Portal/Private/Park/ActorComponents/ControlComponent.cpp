@@ -121,8 +121,5 @@ void UControlComponent::ApplyMouseInput()
 		PlayerController->AddPitchInput(-DeltaY);
 	}
 
-	
-
-	
 
 }

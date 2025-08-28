@@ -68,7 +68,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Tick(float DeltaTime) override;
+	//virtual void Tick(float DeltaTime) override;
 	
 	// for DeActivating
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -115,7 +115,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
 	bool bEnableShadowCasting;
 	
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
 	bool bReplicaVisible;
 #pragma endregion Replica
 

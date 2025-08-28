@@ -50,21 +50,33 @@ void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	{
 		FHitResult Hit;
 		FVector Delta = Velocity * DeltaTime;
+		constexpr float MaxSingleMove = 50.f;
 		
-		SafeMoveUpdatedComponent(Delta, UpdatedComponent->GetComponentRotation(), true, Hit);
-
-		// interact stairs
-		if (Hit.bBlockingHit)
+		if (Delta.Size() > MaxSingleMove)
 		{
-			float CurrentTime = GetWorld()->GetTimeSeconds();
-			if (CurrentTime - LastStepUpTime > 0.1f && TryStepUp(Hit, Delta))
+			FVector Direction = Delta.GetSafeNormal();
+			int32 Steps = FMath::CeilToInt(Delta.Size() / MaxSingleMove);
+			FVector StepDelta = Delta / Steps;
+
+			for (int32 i = 0; i < Steps; i++)
 			{
-				LastStepUpTime = CurrentTime;
+				SafeMoveUpdatedComponent(StepDelta, UpdatedComponent->GetComponentRotation(), true, Hit);
+
+				if (Hit.bBlockingHit)
+				{
+					
+					HandleBlockingHit(Hit, StepDelta);
+					break;
+				}
 			}
-			else
+		}
+		else
+		{
+			SafeMoveUpdatedComponent(Delta, UpdatedComponent->GetComponentRotation(), true, Hit);
+
+			if (Hit.bBlockingHit)
 			{
-				// wall sliding
-				SlideAlongSurface(Delta, 1.0f - Hit.Time, Hit.Normal, Hit);
+				HandleBlockingHit(Hit, Delta);
 			}
 		}
 	}
@@ -105,9 +117,9 @@ void UPlayerMovementComponent::ApplyGravity(float DeltaTime)
 			Velocity.Z -= GravityForce * GravityScale * DeltaTime;
 		}
 	}
-	else if (Velocity.Z < 0.f)
+	else if (Velocity.Z < -10.f)
 	{
-		Velocity.Z = 0.f;
+		Velocity.Z = FMath::Max(Velocity.Z, -10.f);
 	}
 }
 
@@ -152,6 +164,20 @@ void UPlayerMovementComponent::ProcessMovement(float DeltaTime)
 		}
 	}
 }
+
+void UPlayerMovementComponent::HandleBlockingHit(FHitResult& Hit, const FVector& DeltaVector)
+{
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+	if (CurrentTime - LastStepUpTime > 0.1f && TryStepUp(Hit, DeltaVector))
+	{
+		LastStepUpTime = CurrentTime;
+	}
+	else
+	{
+		SlideAlongSurface(DeltaVector, 1.0f - Hit.Time, Hit.Normal, Hit);
+	}
+}
+
 
 FVector UPlayerMovementComponent::CalculateGroundMovement(const FVector& InputVector, float DeltaTime)
 {
@@ -350,13 +376,14 @@ void UPlayerMovementComponent::ImprovedGroundDetection()
 	bool bFoundGround = false;
 	FVector BestGroundNormal = FVector::UpVector;
 	float ClosestGroundDistance = GroundCheckDistance;
+	const float CapsuleRadius = GetOwner()->GetComponentByClass<UCapsuleComponent>()->GetScaledCapsuleRadius();
 	
 	TArray<FVector> CheckDirections = {
 		FVector(0, 0, -1),        // 중앙 아래
-		FVector(5, 0, -1),        // 앞쪽 아래
-		FVector(-5, 0, -1),       // 뒤쪽 아래  
-		FVector(0, 5, -1),        // 우측 아래
-		FVector(0, -5, -1)        // 좌측 아래
+		FVector(CapsuleRadius, 0, -1),        // 앞쪽 아래
+		FVector(-CapsuleRadius, 0, -1),       // 뒤쪽 아래  
+		FVector(0, CapsuleRadius, -1),        // 우측 아래
+		FVector(0, -CapsuleRadius, -1)        // 좌측 아래
 	};
 	
 	for (const FVector& Direction : CheckDirections)
@@ -369,7 +396,7 @@ void UPlayerMovementComponent::ImprovedGroundDetection()
 			float Distance = FVector::Dist(StartLocation, Hit.Location);
 			
 			// Find Ground can stand on
-			if (Distance < ClosestGroundDistance && Hit.Normal.Z > 0.3f)
+			if (Distance < ClosestGroundDistance && Hit.Normal.Z > 0.5f)
 			{
 				bFoundGround = true;
 				BestGroundNormal = Hit.Normal;

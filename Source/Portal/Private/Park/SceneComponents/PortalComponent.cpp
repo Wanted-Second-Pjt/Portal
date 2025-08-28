@@ -4,6 +4,7 @@
 #include "Park/SceneComponents/PortalComponent.h"
 
 #include "MovieSceneFwd.h"
+#include "Kismet/GameplayStatics.h"
 #include "Park/Widget/InGameWidget.h"
 #include "Park/Stuff/PortalPlatform.h"
 //#include "Park/"
@@ -13,17 +14,19 @@ UPortalComponent::UPortalComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	Params.AddIgnoredActor(GetOwner());
-
 }
-
+	
 void UPortalComponent::BeginPlay()
 {
-	Super::BeginPlay();
-	if (APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController()))
+	TArray<AActor*> Portals;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Portal", Portals);
+	for (AActor* Portal : Portals)
 	{
-		AimWidget = CreateWidget<UInGameWidget>(PC, UInGameWidget::StaticClass(), "AimWidget");		
-		AimWidget->AddToPlayerScreen();
+		if (Portal->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0))
+		SetOrangePortal(Portal);
 	}
+	Super::BeginPlay();
+	AimWidget->AddToViewport(0);
 }
 
 bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance)

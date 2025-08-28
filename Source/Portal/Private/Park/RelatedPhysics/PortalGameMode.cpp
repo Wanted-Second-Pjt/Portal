@@ -8,15 +8,21 @@
 #include "Park/Player/PlayerCharacter.h"
 #include "Kang/PortalGameInstance.h"
 #include "Kang/PortalPauseWidget.h"
+#include "Park/Widget/InGameHUD.h"
 
 
 APortalGameMode::APortalGameMode()
 	: Super()
 {
 	// set default pawn class to our Blueprinted character
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_FirstPersonCharacter"));
-	
-	DefaultPawnClass = PlayerPawnClassFinder.Class;
+	//static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/FirstPerson/Blueprints/BP_FirstPersonCharacter"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnClassFinder(TEXT("/Game/Park/Character/BP_Player"));
+	if (PlayerPawnClassFinder.Succeeded())
+	{
+		DefaultPawnClass = PlayerPawnClassFinder.Class;
+	}
+
+	HUDClass = AInGameHUD::StaticClass();
 	//DefaultPawnClass = APlayerCharacter::StaticClass();  
 	
 }

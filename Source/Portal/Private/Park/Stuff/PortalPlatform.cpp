@@ -8,8 +8,13 @@
 #include "Components/ArrowComponent.h"
 #include "Utility/Helper.h"
 #include "Kismet/GameplayStatics.h"
+#include "Park/SceneComponents/PortalComponent.h"
 #include "Utility/DebugHelper.h"
 
+TObjectPtr<APortalPlatform> APortalPlatform::OrangePlatform = nullptr;
+TObjectPtr<APortalPlatform> APortalPlatform::BluePlatform = nullptr;
+const bool APortalPlatform::Orange = true;
+const bool APortalPlatform::Blue = false;
 TObjectPtr<AActor> APortalPlatform::Portal = nullptr;
 TSubclassOf<AActor> APortalPlatform::PortalClass = nullptr;
 const float APortalPlatform::EdgeMargin = 10.f;
@@ -19,7 +24,7 @@ const float APortalPlatform::SurfaceTolerance = 0.9f;
 APortalPlatform::APortalPlatform()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetMobility(EComponentMobility::Static);
@@ -37,17 +42,16 @@ void APortalPlatform::BeginPlay()
 	{
 		LocalBoxExtent = MeshComp->GetStaticMesh()->GetBoundingBox().GetExtent();
 	}
+
 }
 
 void APortalPlatform::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	if (GetWorld()->GetFirstPlayerController()->GetPawn()) //Player-Portal 일정 거리 이하로 오면
-	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	MeshComp->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	
 }
 
+#pragma region Place
 bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& HitNormal)
 {
 	if (Portal == nullptr)
@@ -90,6 +94,15 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 	//InPortal->SetActorRotation(NRotator);
 	InPortal->SetActorRelativeRotation(NRotator);
 	InPortal->SetActorLocation(HitLocation + HitNormal * 5.f);
+
+	if (InPortal->GetActorNameOrLabel().Right(1) == "1")
+	{
+		AddToPlayerInteractionDelegate(Blue);
+	}
+	else if (InPortal->GetActorNameOrLabel().Right(1) == "2")
+	{
+		AddToPlayerInteractionDelegate(Blue);
+	}
 	
 	return;
 	
@@ -162,9 +175,49 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 		InPortal->SetActorLocationAndRotation(NewWorldLocation, NewRotator);
 		return;
 	}
-	
-	
 }
+
+void APortalPlatform::AddToPlayerInteractionDelegate(PortalColor Color)
+{
+	FOnAttachPortal(OnAttachPortal);
+	FOnDetachPortal(OnDetachPortal);
+
+	switch (Color)
+	{
+	case Orange:
+		if (APortalPlatform::OrangePlatform == this)
+		{
+			return;
+		}
+		OnAttachPortal.RemoveAll(APortalPlatform::OrangePlatform);
+		OnAttachPortal.AddUniqueDynamic(this, &APortalPlatform::OffPawnCollision);
+		OnDetachPortal.AddUniqueDynamic(this, &APortalPlatform::OnPawnCollision);
+		OrangePlatform = this;
+		break;
+	case Blue:
+		if (APortalPlatform::BluePlatform == this)
+		{
+			return;
+		}
+		OnDetachPortal.RemoveAll(APortalPlatform::BluePlatform);
+		OnAttachPortal.AddUniqueDynamic(this, &APortalPlatform::OffPawnCollision);
+		OnDetachPortal.AddUniqueDynamic(this, &APortalPlatform::OnPawnCollision);
+		BluePlatform = this;
+		break;
+	}
+}
+
+void APortalPlatform::OnPawnCollision()
+{
+	MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
+}
+
+void APortalPlatform::OffPawnCollision()
+{
+	MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
+}
+
+#pragma endregion Place
 
 #pragma region Tiling
 void APortalPlatform::UpdateTilingAndScale()

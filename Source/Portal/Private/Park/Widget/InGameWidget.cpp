@@ -7,6 +7,7 @@
 void UInGameWidget::SetEnableBlue(const bool& bEnable) const
 {
 	BlueAim->SetOpacity(bEnable);
+	
 }
 
 void UInGameWidget::SetEnableOrange(const bool& bEnable) const

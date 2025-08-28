@@ -126,7 +126,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 	ControlComp->SetController(PlayerController);
-	PlayerController->HiddenActors.Add(this);
+	AutoPossessPlayer = EAutoReceiveInput::Type::Player0;
+	//PlayerController->HiddenActors.Add(this);
 }
 
 void APlayerCharacter::SetupCamera()
