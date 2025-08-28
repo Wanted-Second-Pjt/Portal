@@ -3,6 +3,10 @@
 
 #include "Kang/PortalPortal.h"
 
+#include "Kang/Tool.h"
+#include "Park/Player/PlayerCharacter.h"
+#include "Park/RelatedPhysics/PlayerMovementComponent.h"
+
 
 // Sets default values
 APortalPortal::APortalPortal()
@@ -96,6 +100,88 @@ bool APortalPortal::IsPointCrossingPortal( FVector Point, FVector PortalLocation
 
 
 
+void APortalPortal::TeleportActor(AActor* ActorToTeleport)
+{
+    if( ActorToTeleport == nullptr || Target == nullptr )
+    {
+        return;
+    }
+
+    //-------------------------------
+    //Retrieve and save Player Velocity
+    //(from the Movement Component)
+    //-------------------------------
+    FVector SavedVelocity   = FVector::ZeroVector;
+    APlayerCharacter* PlayerChar    = nullptr;
+
+    if( ActorToTeleport->IsA( APlayerCharacter::StaticClass() ) )
+    {
+        PlayerChar = Cast<APlayerCharacter>( ActorToTeleport );
+
+        SavedVelocity = PlayerChar->GetMovementComp()->GetCurrentVelocity();
+    }
+
+    //-------------------------------
+    //Compute and apply new location
+    //-------------------------------
+    FHitResult HitResult;
+    FVector NewLocation = UTool::ConvertLocationToActorSpace(   ActorToTeleport->GetActorLocation(),
+                                                                this,
+                                                                Target );
+
+    ActorToTeleport->SetActorLocation(  NewLocation,
+                                        false,
+                                        &HitResult,
+                                        ETeleportType::TeleportPhysics );
+
+    //-------------------------------
+    //Compute and apply new rotation
+    //-------------------------------
+	FRotator NewRotation = UTool::ConvertRotationToActorSpace(ActorToTeleport->GetActorRotation(),this, Target);
+
+	//Apply new rotation
+    ActorToTeleport->SetActorRotation( NewRotation );
+
+    //-------------------------------
+    //If we are teleporting a character we need to
+    //update its controller as well and reapply its velocity
+    //-------------------------------
+    if( ActorToTeleport->IsA( APlayerCharacter::StaticClass() ) )
+    {
+        //Update Controller
+        APlayerController* PlayerCharCont = GetWorld()->GetFirstPlayerController();
+
+        if( PlayerCharCont != nullptr )
+        {
+            NewRotation = UTool::ConvertRotationToActorSpace(   PlayerCharCont->GetControlRotation(),
+                                                                this,
+                                                                Target );
+
+            PlayerCharCont->SetControlRotation( NewRotation );
+        }
+
+        //Reapply Velocity (Need to reorient direction into local space of Portal)
+        {
+            FVector Dots;
+            Dots.X  = FVector::DotProduct( SavedVelocity, GetActorForwardVector() );
+            Dots.Y  = FVector::DotProduct( SavedVelocity, GetActorRightVector() );
+            Dots.Z  = FVector::DotProduct( SavedVelocity, GetActorUpVector() );
+
+            FVector NewVelocity     = Dots.X * Target->GetActorForwardVector()
+                                    + Dots.Y * Target->GetActorRightVector()
+                                    + Dots.Z * Target->GetActorUpVector();
+
+            PlayerChar->GetMovementComponent()->Velocity = NewVelocity;
+        }
+    }
+
+    //Cleanup Teleport
+    LastPosition = NewLocation;
+}
+
+
+
+	
 
 
 

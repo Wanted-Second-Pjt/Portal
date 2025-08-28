@@ -53,8 +53,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsPointCrossingPortal( FVector Point, FVector PortalLocation, FVector PortalNormal );
 
-	/*UFUNCTION(BlueprintCallable)
-	void TeleportActor( AActor* ActorToTeleport );*/
+	UFUNCTION(BlueprintCallable)
+	void TeleportActor( AActor* ActorToTeleport );
+	
 	
 protected:
 	UPROPERTY(BlueprintReadOnly)
@@ -67,7 +68,7 @@ private:
 
 	//Used for Tracking movement of a point
 	FVector LastPosition;
-	bool    LastInFront;
+	bool LastInFront;
 };
 
 
