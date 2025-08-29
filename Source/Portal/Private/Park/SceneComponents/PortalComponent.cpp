@@ -4,6 +4,8 @@
 #include "Park/SceneComponents/PortalComponent.h"
 
 #include "MovieSceneFwd.h"
+#include "Kismet/GameplayStatics.h"
+#include "Park/Widget/InGameWidget.h"
 #include "Park/Stuff/PortalPlatform.h"
 //#include "Park/"
 
@@ -13,11 +15,18 @@ UPortalComponent::UPortalComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	Params.AddIgnoredActor(GetOwner());
 }
-
+	
 void UPortalComponent::BeginPlay()
 {
+	TArray<AActor*> Portals;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Portal", Portals);
+	for (AActor* Portal : Portals)
+	{
+		if (Portal->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0))
+		SetOrangePortal(Portal);
+	}
 	Super::BeginPlay();
-
+	AimWidget->AddToViewport(0);
 }
 
 bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance)
@@ -35,7 +44,18 @@ bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const F
 	if (APortalPlatform* Platform = Cast<APortalPlatform>(HitResult.GetActor());
 		bHit && IsValid(Platform))
 	{
-		return Platform->CanPlacePortal(HitResult.ImpactPoint, HitResult.ImpactNormal);
+		const bool bCanPlace = Platform->CanPlacePortal(HitResult.ImpactPoint, HitResult.ImpactNormal);
+		if (IsValid(AimWidget))
+		{
+			AimWidget->SetEnableOrange(bCanPlace);
+			AimWidget->SetEnableBlue(bCanPlace);
+		}
+		return bCanPlace;
+	}
+	if (IsValid(AimWidget))
+	{
+		AimWidget->SetEnableOrange(false);
+		AimWidget->SetEnableBlue(false);
 	}
 	return false;
 }

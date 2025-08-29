@@ -2,11 +2,15 @@
 
 
 #include "Park/Widget/InGameWidget.h"
+#include "Components/Image.h"
 
-void UInGameWidget::SetEnableBlue(bool bEnable)
+void UInGameWidget::SetEnableBlue(const bool& bEnable) const
 {
+	BlueAim->SetOpacity(bEnable);
+	
 }
 
-void UInGameWidget::SetEnableOrange(bool bEnable)
+void UInGameWidget::SetEnableOrange(const bool& bEnable) const
 {
+	OrangeAim->SetOpacity(bEnable);
 }

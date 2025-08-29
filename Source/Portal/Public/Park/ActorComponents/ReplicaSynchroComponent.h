@@ -8,11 +8,6 @@ class AReplicaCharacter;
 #include "Components/ActorComponent.h"
 #include "ReplicaSynchroComponent.generated.h"
 
-#pragma region ReplicaSynchro
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReplicaCreated, ACharacter*, Replica);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReplicaDestroyed, ACharacter*, Replica);
-#pragma endregion ReplicaSynchro
-
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PORTAL_API UReplicaSynchroComponent : public UActorComponent
@@ -36,22 +31,25 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Replica")
 	void DestroyReplica();
 	
-	UFUNCTION(BlueprintCallable, Category = "Replica")
-	void SyncToReplica();
-	
 	UFUNCTION(BlueprintPure, Category = "Replica")
 	AReplicaCharacter* GetCurrentReplica() const { return CurrentReplica; }
-	
 
 	UFUNCTION(BlueprintCallable, Category = "Portal")
-	void OnPlayerEnterPortal();
+	void OnReplicaVisible();
 	
 	UFUNCTION(BlueprintCallable, Category = "Portal") 
-	void OnPlayerExitPortal();
+	void OnReplicaInvisible();
+
+protected:
 	
-	UFUNCTION(BlueprintCallable, Category = "Portal")
-	void SetReplicaVisibility(bool bVisible);
+	// Sync with Anim Instance Or Pose Data
+	UFUNCTION(BlueprintCallable, Category = "Replica")
+	void SyncToReplica(const bool& bLink);
 	
+	// Sync with Pose Data
+	UFUNCTION(BlueprintCallable, Category = "Replica")
+	void SyncToReplicaPose(const bool& bLink);
+
 	UFUNCTION(BlueprintCallable, Category = "Portal")
 	void SetupPortalCamera();
 	
@@ -69,7 +67,7 @@ private:
 private:
 #pragma region Replica
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Replica Settings", meta = (AllowPrivateAccess))
-	FVector ReplicaSpawnOffset = FVector(0, 0, 0); // Debug : with player
+	FVector ReplicaSpawnOffset = FVector(100.f, 100.f, 100.f); // Debug : with player
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Replica", meta = (AllowPrivateAccess))
 	TObjectPtr<AReplicaCharacter> CurrentReplica;
@@ -80,7 +78,7 @@ private:
 	float SyncFrequency = 30.0f; 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Synchronization", meta = (AllowPrivateAccess))
-	bool bSyncMovementState = true;
+	bool bSyncMovementState;
 	
 	float LastSyncTime;
 #pragma endregion Synchro
@@ -95,9 +93,5 @@ private:
 	TObjectPtr<class UEquipmentComponent> EquipmentComp;
 
 public:
-	UPROPERTY(BlueprintAssignable, Category = "Replica Events")
-	FOnReplicaCreated OnReplicaCreated;
 	
-	UPROPERTY(BlueprintAssignable, Category = "Replica Events")
-	FOnReplicaDestroyed OnReplicaDestroyed;
 };

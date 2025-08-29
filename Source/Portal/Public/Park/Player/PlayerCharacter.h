@@ -3,16 +3,18 @@
 #pragma once
 
 class UCapsuleComponent;
-class UPortalComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
-class UControlComponent;
-class UEquipmentComponent;
-class UPlayerMovementComponent;
-class UReplicaSynchroComponent;
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+
+#include "PortalWeaponComponent.h"
+#include "Park/ActorComponents/ControlComponent.h"
+#include "Park/SceneComponents/PortalComponent.h"
+#include "Park/RelatedPhysics/PlayerMovementComponent.h"
+#include "Park/ActorComponents/EquipmentComponent.h"
+#include "Park/ActorComponents/ReplicaSynchroComponent.h"
 
 
 #include "PlayerCharacter.generated.h"
@@ -73,6 +75,8 @@ private:
 	TObjectPtr<USkeletalMeshComponent> SkeletalComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UCameraComponent> CameraComp;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
+	TObjectPtr<UPortalWeaponComponent> WeaponComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UControlComponent> ControlComp;

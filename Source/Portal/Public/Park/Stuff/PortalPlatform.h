@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "PortalPlatform.generated.h"
 
+typedef bool PortalColor;
+
+
 UCLASS()
 class PORTAL_API APortalPlatform : public AActor
 {
@@ -27,7 +30,13 @@ public:
 	void SpawnPortal(const bool& CanEnter, AActor* InPortal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector);
 
 protected:
-	//void Facing(const FVector& LocalPoint, const FVector& LocalNormal);
+	void AddToPlayerInteractionDelegate(PortalColor Color);
+	
+	UFUNCTION(BlueprintCallable, Category="Player")
+	void OnPawnCollision();
+	UFUNCTION(BlueprintCallable, Category="Player")
+	void OffPawnCollision();
+	
 #pragma endregion PortalPlacement
 
 #pragma region Tiling
@@ -106,6 +115,10 @@ protected:
 	FTransform InversedTransform;
 
 private:
+	static TObjectPtr<APortalPlatform> OrangePlatform;
+	static TObjectPtr<APortalPlatform> BluePlatform;
+	static const bool Orange;
+	static const bool Blue;
 	
 	static TObjectPtr<AActor> Portal;
 	static TSubclassOf<AActor> PortalClass;

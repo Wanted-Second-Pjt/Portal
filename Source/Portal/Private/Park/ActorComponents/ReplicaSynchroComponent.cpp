@@ -10,17 +10,19 @@
 #include "Park/Player/ReplicaCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Kismet/GameplayStatics.h"
+#include "Park/SceneComponents/PortalComponent.h"
 
 UReplicaSynchroComponent::UReplicaSynchroComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
+	bSyncMovementState = false; // When Use Anim Inst
 	// Runtime Synchro Status
 	LastSyncTime = 0.0f;
-	
 	// Synchro Status
 	SyncFrequency = 30.0f;
-	bSyncMovementState = true;
+	
 }
 
 void UReplicaSynchroComponent::BeginPlay()
@@ -47,32 +49,22 @@ void UReplicaSynchroComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	{
 		return;
 	}
-
-	/*
-	if (!IsValid(CurrentReplica->GetMesh()->GetSkeletalMeshAsset()))
+	
+	// When Use AnimInstance
+	if (bSyncMovementState)
 	{
-		CurrentReplica->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
-		if (USkeletalMeshComponent* ReplicaMesh = CurrentReplica->GetMesh())
+		// 30 FPS hard Coding. need to modify
+		if (const float CurrentTime = GetWorld()->GetTimeSeconds();
+			CurrentTime - LastSyncTime > (1.0f / SyncFrequency))
 		{
-			ReplicaMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			ReplicaMesh->SetSimulatePhysics(false);
-			ReplicaMesh->SetCastShadow(true);
+			LastSyncTime = CurrentTime;
 		}
-		CurrentReplica->DisableInput(nullptr);
-		SetupPortalCamera();
-		OnReplicaCreated.Broadcast(CurrentReplica);
-	}
-	*/
-	if (float CurrentTime = GetWorld()->GetTimeSeconds(); CurrentTime - LastSyncTime > (1.0f / SyncFrequency))// 30 FPS hard Coding. need to modify
-	{
-		SyncToReplica();
-		LastSyncTime = CurrentTime;
 	}
 }
 
 void UReplicaSynchroComponent::CreateReplica()
 {
-	if (!GetWorld())
+	if (!GetWorld() || !IsValid(GetOwner()))
 	{
 		return;
 	}
@@ -82,38 +74,38 @@ void UReplicaSynchroComponent::CreateReplica()
 		DestroyReplica();
 	}
 	
-	if (!IsValid(GetOwner()))
-	{
-		return;
-	}
-	
-	FVector SpawnLocation = GetOwner()->GetActorLocation() + ReplicaSpawnOffset;
-	FRotator SpawnRotation = GetOwner()->GetActorRotation();
-	
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.TransformScaleMethod = ESpawnActorScaleMethod::OverrideRootScale;
+	SpawnParams.CustomPreSpawnInitalization =
+		[&](AActor* SpawnedActor)
+		{
+			SpawnedActor->DisableInput(nullptr);
+			if (USkeletalMeshComponent* ReplicaSKM = SpawnedActor->FindComponentByClass<USkeletalMeshComponent>())
+			{
+				UE_LOG(LogTemp, Display, TEXT("Replica SKM Exist"));
+				ReplicaSKM->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
+				ReplicaSKM->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				ReplicaSKM->SetSimulatePhysics(false);
+				ReplicaSKM->SetCastShadow(true);
+			}
+			
+		};
 	
-	CurrentReplica = GetWorld()->SpawnActor<AReplicaCharacter>(SpawnLocation, SpawnRotation, SpawnParams);
+	FTransform SpawnTransform = GetOwner()->GetActorTransform();
+	SpawnTransform.SetTranslation(SpawnTransform.GetTranslation() + ReplicaSpawnOffset);
+	CurrentReplica = GetWorld()->SpawnActor<AReplicaCharacter>(AReplicaCharacter::StaticClass(), SpawnTransform, SpawnParams);
 	
 	if (IsValid(CurrentReplica))
 	{
-		CurrentReplica->DisableInput(nullptr);
-		if (!IsValid(CurrentReplica->GetMesh()->GetSkeletalMeshAsset()))
-		{
-			CurrentReplica->GetMesh()->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
-			if (USkeletalMeshComponent* ReplicaMesh = CurrentReplica->GetMesh())
-			{
-				ReplicaMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-				ReplicaMesh->SetSimulatePhysics(false);
-				ReplicaMesh->SetCastShadow(true);
-			}
-		}
+		UE_LOG(LogTemp, Display, TEXT("Replica Character Synced In ReplicaSync Component"));
+		//FOnAttachPortal OnAttachPortal;
+		//FOnDetachPortal OnDetachPortal;
 		
+		FOnAttachPortal().AddUniqueDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
+		FOnDetachPortal().AddUniqueDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
 		SetupPortalCamera();
-		
-		SyncToReplica();
-		
-		OnReplicaCreated.Broadcast(CurrentReplica);
 	}
 }
 
@@ -121,47 +113,71 @@ void UReplicaSynchroComponent::DestroyReplica()
 {
 	if (CurrentReplica && IsValid(CurrentReplica))
 	{
-		OnReplicaDestroyed.Broadcast(CurrentReplica);
+		FOnDetachPortal().Broadcast();
+		
+		FOnAttachPortal().RemoveDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
+		FOnDetachPortal().RemoveDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
 		
 		CurrentReplica->Destroy();
 		CurrentReplica = nullptr;
 	}
 }
 
-void UReplicaSynchroComponent::SyncToReplica()
+void UReplicaSynchroComponent::SyncToReplica(const bool& bLink)
 {
+	if (!CurrentReplica || !IsValid(CurrentReplica))
+	{
+		return;
+	}
+	
 	if (bSyncMovementState)
 	{
+		UE_LOG(LogTemp, Display, TEXT("Replica Synchronization State : Anim Inst"));
 		SyncMovementData(); // Update data, Replica will pull when Needed
+		return;
 	}
+	
+	UE_LOG(LogTemp, Display, TEXT("Replica Synchronization State : Pose"));
+	SyncToReplicaPose(bLink);
 }
 
-void UReplicaSynchroComponent::OnPlayerEnterPortal()
+void UReplicaSynchroComponent::SyncToReplicaPose(const bool& bLink)
 {
-	if (AReplicaCharacter* ReplicaChar = Cast<AReplicaCharacter>(CurrentReplica))
+	if (IsValid(GetPlayerCharacter()))
 	{
-		ReplicaChar->TriggerPortalEffect(true);
+		if (USkeletalMeshComponent* ReplicaMeshComp = CurrentReplica->GetMesh();
+			IsValid(ReplicaMeshComp) && IsValid(GetPlayerCharacter()->GetSkeletalComp())
+		)
+		{
+			bLink ?
+				ReplicaMeshComp->SetLeaderPoseComponent(GetPlayerCharacter()->GetSkeletalComp(), false, true)
+				: ReplicaMeshComp->SetLeaderPoseComponent(nullptr, false, false);
+		}
 	}
 	
 }
 
-void UReplicaSynchroComponent::OnPlayerExitPortal()
+void UReplicaSynchroComponent::OnReplicaVisible()
 {
 	if (IsValid(CurrentReplica))
 	{
-		CurrentReplica->TriggerPortalEffect(false);
+		//CurrentReplica->TriggerPortalEffect(true);  // AnimInstance
+		CurrentReplica->SetReplicaVisibility(true);
+		SyncToReplica(true);
 	}
 	
-	SyncToReplica();
 }
 
-void UReplicaSynchroComponent::SetReplicaVisibility(bool bVisible)
+void UReplicaSynchroComponent::OnReplicaInvisible()
 {
-	if (CurrentReplica && IsValid(CurrentReplica))
+	if (IsValid(CurrentReplica))
 	{
-		CurrentReplica->SetReplicaVisibility(bVisible);
+		//CurrentReplica->TriggerPortalEffect(false);  // AnimInstance
+		CurrentReplica->SetReplicaVisibility(false);
+		SyncToReplica(false);
 	}
 }
+
 
 void UReplicaSynchroComponent::SetupPortalCamera()
 {
@@ -169,24 +185,24 @@ void UReplicaSynchroComponent::SetupPortalCamera()
 	{
 		return;
 	}
-	for (TActorIterator<AActor> ActorIterator(GetWorld()); ActorIterator; ++ActorIterator)
+
+	UE_LOG(LogTemp, Display, TEXT("Enter Portal Camera Setup"));
+	TArray<AActor*> Portals;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Portal"), Portals);
+	for (AActor* Portal : Portals)
 	{
-		AActor* Actor = *ActorIterator;
-		if (USceneCaptureComponent2D* SceneCapture = Actor->FindComponentByClass<USceneCaptureComponent2D>())
+		if (USceneCaptureComponent2D* SceneCapture = Portal->FindComponentByClass<USceneCaptureComponent2D>())
 		{
-			SceneCapture->HiddenActors.Empty();
-			if (APlayerCharacter* Player = GetPlayerCharacter())
-			{
-				SceneCapture->HiddenActors.AddUnique(CurrentReplica);
-				// Replica Can't be Rendered by Portal Cam
-				//PortalCamera->bCaptureEveryFrame = true;
-				//PortalCamera->bCaptureOnMovement = true;
-			}
+			UE_LOG(LogTemp, Display, TEXT("Find Success Portal Camera"));
+			//SceneCapture->HiddenActors.Empty();
+			SceneCapture->HiddenActors.AddUnique(CurrentReplica);
+			
+			// Replica wouldn't be Rendered by Portal Cam
+			//PortalCamera->bCaptureEveryFrame = true;
+			//PortalCamera->bCaptureOnMovement = true;
 		}
 	}
-	
 	//SetReplicaVisibility(true);
-	SyncToReplica();
 }
 
 

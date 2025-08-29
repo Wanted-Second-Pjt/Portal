@@ -46,6 +46,9 @@ RiderLink/
 *.VC.opendb
 .vsconfig
 
+# DDotNET ReSharper
+*.DotSettings.user
+
 # Precompiled Assets
 SourceArt/**/*.png
 SourceArt/**/*.tga

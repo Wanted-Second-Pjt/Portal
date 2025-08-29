@@ -41,6 +41,8 @@ private:
 	void ApplyGravity(float DeltaTime);
 	
 	void ProcessMovement(float DeltaTime); // 버니홉 지원... 뺄까?
+
+	void HandleBlockingHit(FHitResult& Hit, const FVector& DeltaVector);
 	
 	void CheckGroundCollision();
 	

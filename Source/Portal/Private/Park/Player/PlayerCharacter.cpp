@@ -2,6 +2,8 @@
 
 
 #include "Park/Player/PlayerCharacter.h"
+
+#include "PortalWeaponComponent.h"
 #include "GameFramework/PlayerController.h"
 
 #include "Utility/Helper.h"
@@ -89,26 +91,28 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{
 		#pragma region Movement
 		MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
-		if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
+		if (ControlComp->PressedSpaceBar())
 		{
 			MovementComp->Jump();
 		}
 		#pragma endregion Movement
 
 		#pragma region Able Portal
-		bool bEnablePortal = false;
 		if (LIKELY(IsValid(PortalComp) && IsValid(CameraComp)))
 		{
-			bEnablePortal = PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
-			
-		}
-		if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
-		{
-			
-		}
-		if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
-		{
-			//EquipmentComp->NormalAction(false);
+			if (IsValid(WeaponComp))
+			{
+				const bool bEnablePortal = PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
+				if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
+				{
+					WeaponComp->Fire();
+				}
+				if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
+				{
+					WeaponComp->Fire();
+				}
+				
+			}
 		}
 		#pragma endregion Able Portal
 	}
@@ -122,7 +126,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
 	ControlComp->SetController(PlayerController);
-	PlayerController->HiddenActors.Add(this);
+	AutoPossessPlayer = EAutoReceiveInput::Type::Player0;
+	//PlayerController->HiddenActors.Add(this);
 }
 
 void APlayerCharacter::SetupCamera()
