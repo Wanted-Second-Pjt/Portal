@@ -4,9 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Park/Player/PlayerCharacter.h"
 #include "PortalPortal.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class PORTAL_API APortalPortal : public AActor
 {
 	GENERATED_BODY()
@@ -22,52 +23,80 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//Status of the Portal (being visualized by the player or not)
-	UFUNCTION(BlueprintPure)
-	bool IsActive();
 
-	UFUNCTION(BlueprintCallable)
-	void SetActive( bool NewActive );
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USceneCaptureComponent2D* PortalCamera;
 
-	//Render target to use to display the portal
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void ClearRTT();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetRTT( UTexture* RenderTexture );
-
-	UFUNCTION(BlueprintNativeEvent)
-	void ForceTick();
-
-	//Target of where the portal is looking
-	UFUNCTION(BlueprintPure)
-	AActor* GetTarget();
-
-	UFUNCTION(BlueprintCallable)
-	void SetTarget( AActor* NewTarget );
-
-	//Helpers
-	UFUNCTION(BlueprintCallable)
-	bool IsPointInFrontOfPortal( FVector Point, FVector PortalLocation, FVector PortalNormal );
-
-	UFUNCTION(BlueprintCallable)
-	bool IsPointCrossingPortal( FVector Point, FVector PortalLocation, FVector PortalNormal );
-
-	/*UFUNCTION(BlueprintCallable)
-	void TeleportActor( AActor* ActorToTeleport );*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USceneComponent* SceneRoot;
 	
-protected:
-	UPROPERTY(BlueprintReadOnly)
-	USceneComponent* PortalRootComponent;
 
-private:
-	bool bIsActive;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UMaterialInstanceDynamic* PortalMaterial;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTextureRenderTarget2D* PortalRenderTarget;
 
-	AActor* Target;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APortalPortal* LinkedPortal;
 
-	//Used for Tracking movement of a point
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector LastPosition;
-	bool    LastInFront;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool LastInFront;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CurrentRecursion;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 MaxRecursion = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float OffsetValue = -4.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AActor* TeleportObject;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APlayerCharacter* Player;
+	
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void SetClipPlane();
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void Init();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void Teleport();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShouldTeleport();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	bool IsPointCrossingPortal(FVector Point, FVector PortalLocation, FVector PortalNormal);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	FVector UpdateLocation(FVector OldLocation);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	FRotator UpdateRotation(FRotator OldRotation);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateSceneCaptureRecursive(FVector Location, FRotator Rotation);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	FVector UpdateVelocity(FVector OldVelocity);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PortalActivation();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PortalDeactivation();
+	
+	
+
 };
 
 
