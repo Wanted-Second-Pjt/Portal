@@ -36,7 +36,9 @@ void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	{
 		return;
 	}
-	
+	//DEBUG_HELPER_PRINT_VECTOR(Velocity);
+	//DEBUG_HELPER_PRINT_BOOL(bIsOnGround);
+		
 	ProcessMovement(DeltaTime);
 	
 	ApplyGravity(DeltaTime);
@@ -91,6 +93,8 @@ void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	PendingInputVector = FVector::ZeroVector;
 	bJumpPressed = false;
 	
+	//DEBUG_HELPER_PRINT_VECTOR(Velocity);
+	//DEBUG_HELPER_PRINT_BOOL(bIsOnGround);
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
@@ -281,7 +285,7 @@ bool UPlayerMovementComponent::SweepCollision(const FVector& Start, const FVecto
 void UPlayerMovementComponent::EnterPortal()
 {
 	Velocity *= PortalTransitionDamping;
-	DEBUG_HELPER_PRINT_LINE();  // check enter portal
+	//DEBUG_HELPER_PRINT_LINE();  // check enter portal
 }
 
 void UPlayerMovementComponent::AddInputVector(FVector WorldVector, bool bForce)

@@ -91,7 +91,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	{
 		#pragma region Movement
 		MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
-		if (MovementComp->IsJumpAllowed() && ControlComp->PressedSpaceBar())
+		if (ControlComp->PressedSpaceBar())
 		{
 			MovementComp->Jump();
 		}

@@ -56,7 +56,7 @@ bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& 
 {
 	if (Portal == nullptr)
 	{
-		DEBUG_HELPER_PRINT_BOOL(false);
+		//DEBUG_HELPER_PRINT_BOOL(false);
 		return false;
 	}
 	
@@ -79,7 +79,7 @@ bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& 
 	{
 	   MinFaceDimension = FMath::Min(LocalBoxExtent.X, LocalBoxExtent.Y);
 	}
-	DEBUG_HELPER_PRINT_BOOL(MaxPortalDimension + (EdgeMargin * 2) >= MinFaceDimension);
+	//DEBUG_HELPER_PRINT_BOOL(MaxPortalDimension + (EdgeMargin * 2) >= MinFaceDimension);
 	return MaxPortalDimension + (EdgeMargin * 2) >= MinFaceDimension;
 }
 
@@ -227,14 +227,14 @@ void APortalPlatform::UpdateTilingAndScale()
 		TileCount.Y * TileWorldSize.Y / LocalBoxExtent.Y * 2,
 		TileCount.Z * TileWorldSize.Z / LocalBoxExtent.Z * 2
 	);
-	DEBUG_HELPER_LOG("Local Bound Extents : " + LocalBoxExtent.ToString());
+	//DEBUG_HELPER_LOG("Local Bound Extents : " + LocalBoxExtent.ToString());
 
 	SetActorScale3D(NewScale);
 	CurrentWorldScale = NewScale;
 
 	UpdateMaterialTiling();
 
-	DEBUG_HELPER_LOG("Tile Count : " + TileCount.ToString());
+	//DEBUG_HELPER_LOG("Tile Count : " + TileCount.ToString());
 }
 
 void APortalPlatform::SetTileCountX(int32 NewCount)
@@ -259,14 +259,14 @@ TObjectPtr<UMaterialInstanceDynamic> APortalPlatform::GetDynamicMaterial()
 {
 	if (MeshComp == nullptr || !MeshComp->IsValidLowLevelFast() || MeshComp->GetStaticMesh() == nullptr)
 	{
-		DEBUG_HELPER_WARNING_THIS_LINE;
+		//DEBUG_HELPER_WARNING_THIS_LINE;
 		return nullptr;
 	}
     
 	UMaterialInstanceDynamic* DynamicMat = Cast<UMaterialInstanceDynamic>(MeshComp->GetMaterial(0));
 	if (DynamicMat != nullptr && IsValid(DynamicMat))
 	{
-		DEBUG_HELPER_WARNING_THIS_LINE;
+		//DEBUG_HELPER_WARNING_THIS_LINE;
 		return DynamicMat;
 	}
 	
@@ -277,7 +277,7 @@ TObjectPtr<UMaterialInstanceDynamic> APortalPlatform::GetDynamicMaterial()
 		return DynamicMat;
 	}
 
-	DEBUG_HELPER_WARNING_THIS_LINE;
+	//DEBUG_HELPER_WARNING_THIS_LINE;
 	return nullptr;
 }
 
@@ -286,7 +286,7 @@ void APortalPlatform::UpdateMaterialTiling()
 	UMaterialInstanceDynamic* DynamicMat = GetDynamicMaterial();
 	if (UNLIKELY(DynamicMat == nullptr || !IsValid(DynamicMat)))
 	{
-		DEBUG_HELPER_WARNING_THIS_LINE;
+		//DEBUG_HELPER_WARNING_THIS_LINE;
 		return;
 	}
 	
