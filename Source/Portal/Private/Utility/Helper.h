@@ -46,14 +46,5 @@ public:
 	}
 
 	// Portal mostly Status(Scale, Extent etc) will Not change. /Game/FirstPerson/Blueprints/BP_FirstPersonProjectile.BP_FirstPersonProjectile
-	static UClass* GetPortalClassFromConstructor(const FString& Path = "/Script/Engine.Blueprint'/Game/Kang/PortalSystem/BP_Portal.BP_Portal_C'")
-	{
-		
-		// ConstructorHelpers::FObjectFinder<AActor> Finder(*Path);
-		if (ConstructorHelpers::FClassFinder<AActor> Finder(*Path); Finder.Succeeded())
-		{
-			return Finder.Class;
-		}
-		return nullptr;
-	}
+	
 };

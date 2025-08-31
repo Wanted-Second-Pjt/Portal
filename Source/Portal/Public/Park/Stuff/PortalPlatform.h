@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "PortalPlatform.generated.h"
 
+class APortalPortal;
 typedef bool PortalColor;
 
 
@@ -27,15 +28,15 @@ public:
 	bool CanPlacePortal(const FVector& HitLocation, const FVector& HitNormal);
 
 	UFUNCTION(BlueprintCallable, Category="Portal")
-	void SpawnPortal(const bool& CanEnter, AActor* InPortal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector);
+	void SpawnPortal(const bool& CanEnter, APortalPortal* InPortal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector);
 
 protected:
-	void AddToPlayerInteractionDelegate(PortalColor Color);
+	void AddToPlayerInteractionDelegate(APortalPortal* InPortal);
 	
 	UFUNCTION(BlueprintCallable, Category="Player")
-	void OnPawnCollision();
+	void OnPawnCollision(APortalPortal* Portal);
 	UFUNCTION(BlueprintCallable, Category="Player")
-	void OffPawnCollision();
+	void OffPawnCollision(APortalPortal* Portal);
 	
 #pragma endregion PortalPlacement
 
@@ -117,11 +118,9 @@ protected:
 private:
 	static TObjectPtr<APortalPlatform> OrangePlatform;
 	static TObjectPtr<APortalPlatform> BluePlatform;
-	static const bool Orange;
-	static const bool Blue;
 	
-	static TObjectPtr<AActor> Portal;
-	static TSubclassOf<AActor> PortalClass;
+	static TSubclassOf<APortalPortal> PortalClass;
+	static TObjectPtr<UStaticMeshComponent> PortalMeshComp;
 	const static float EdgeMargin;
 	static const float SurfaceTolerance;
 #pragma endregion PortalPlacement

@@ -3,20 +3,14 @@
 
 #include "Park/Stuff/PortalPlatform.h"
 
-#include "MatrixTypes.h"
-#include "Algo/Includes.h"
-#include "Components/ArrowComponent.h"
-#include "Utility/Helper.h"
+#include "Kang/PortalPortal.h"
 #include "Kismet/GameplayStatics.h"
-#include "Park/SceneComponents/PortalComponent.h"
 #include "Utility/DebugHelper.h"
 
 TObjectPtr<APortalPlatform> APortalPlatform::OrangePlatform = nullptr;
 TObjectPtr<APortalPlatform> APortalPlatform::BluePlatform = nullptr;
-const bool APortalPlatform::Orange = true;
-const bool APortalPlatform::Blue = false;
-TObjectPtr<AActor> APortalPlatform::Portal = nullptr;
-TSubclassOf<AActor> APortalPlatform::PortalClass = nullptr;
+TObjectPtr<UStaticMeshComponent> APortalPlatform::PortalMeshComp = nullptr;
+TSubclassOf<APortalPortal> APortalPlatform::PortalClass = nullptr;
 const float APortalPlatform::EdgeMargin = 10.f;
 const float APortalPlatform::SurfaceTolerance = 0.9f;
 
@@ -29,14 +23,32 @@ APortalPlatform::APortalPlatform()
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	MeshComp->SetMobility(EComponentMobility::Static);
 	SetRootComponent(MeshComp);
-	PortalClass = Helper::GetPortalClassFromConstructor();
+	static ConstructorHelpers::FClassFinder<APortalPortal> Finder(TEXT("/Script/Engine.Blueprint'/Game/Kang/PortalSystem/BP_Portal1.BP_Portal1_C'"));
+	if (Finder.Succeeded())
+	{
+		PortalClass = Finder.Class;
+	}
 }
 
 void APortalPlatform::BeginPlay()
 {
+	OrangePlatform = nullptr;
+	BluePlatform = nullptr;
+	PortalMeshComp = nullptr;
 	Super::BeginPlay();
-	// 추후 cpp Portal 생기면 해당 class 가져오기
-	Portal = UGameplayStatics::GetActorOfClass(GetWorld(), PortalClass);
+	
+	APortalPortal* Portal = Cast<APortalPortal>(UGameplayStatics::GetActorOfClass(GetWorld(), PortalClass));
+
+	TArray<UStaticMeshComponent*> PortalMeshComps;
+	Portal->GetComponents<UStaticMeshComponent>(PortalMeshComps, true);
+	for (UStaticMeshComponent* PMC : PortalMeshComps)
+	{
+		if (PMC->GetName() == "PortalPlane")
+		{
+			PortalMeshComp = PMC;
+			break;
+		}
+	}
 	InversedTransform = GetTransform().Inverse();
 	if (IsValid(MeshComp->GetStaticMesh()))
 	{
@@ -53,14 +65,7 @@ void APortalPlatform::Tick(float DeltaSeconds)
 
 #pragma region Place
 bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& HitNormal)
-{
-	if (Portal == nullptr)
-	{
-		//DEBUG_HELPER_PRINT_BOOL(false);
-		return false;
-	}
-	
-	static const UStaticMeshComponent* PortalMeshComp = Portal->GetComponentByClass<UStaticMeshComponent>();
+{	
 	static FVector PortalExtent = InversedTransform.InverseTransformVector(PortalMeshComp->GetPlacementExtent().GetBox().GetExtent());
 	
 	float MaxPortalDimension = FMath::Max(PortalExtent.X, PortalExtent.Y, PortalExtent.Z);
@@ -83,7 +88,7 @@ bool APortalPlatform::CanPlacePortal(const FVector& HitLocation, const FVector& 
 	return MaxPortalDimension + (EdgeMargin * 2) >= MinFaceDimension;
 }
 
-void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector)
+void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal, const FVector& HitLocation, const FVector& HitNormal, const FVector& CamRightVector)
 {
 	if (!CanEnter || !InPortal)
 		return;
@@ -95,14 +100,8 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 	InPortal->SetActorRelativeRotation(NRotator);
 	InPortal->SetActorLocation(HitLocation + HitNormal * 5.f);
 
-	if (InPortal->GetActorNameOrLabel().Right(1) == "1")
-	{
-		AddToPlayerInteractionDelegate(Blue);
-	}
-	else if (InPortal->GetActorNameOrLabel().Right(1) == "2")
-	{
-		AddToPlayerInteractionDelegate(Blue);
-	}
+	AddToPlayerInteractionDelegate(InPortal);
+
 	
 	return;
 	
@@ -177,44 +176,44 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, AActor* InPortal, const 
 	}
 }
 
-void APortalPlatform::AddToPlayerInteractionDelegate(PortalColor Color)
+void APortalPlatform::AddToPlayerInteractionDelegate(APortalPortal* InPortal)
 {
-	FOnAttachPortal(OnAttachPortal);
-	FOnDetachPortal(OnDetachPortal);
-
-	switch (Color)
+	if (InPortal->ActorHasTag("Blue"))
 	{
-	case Orange:
-		if (APortalPlatform::OrangePlatform == this)
-		{
-			return;
-		}
-		OnAttachPortal.RemoveAll(APortalPlatform::OrangePlatform);
-		OnAttachPortal.AddUniqueDynamic(this, &APortalPlatform::OffPawnCollision);
-		OnDetachPortal.AddUniqueDynamic(this, &APortalPlatform::OnPawnCollision);
-		OrangePlatform = this;
-		break;
-	case Blue:
+		if (IsValid(BluePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *BluePlatform->GetName());
 		if (APortalPlatform::BluePlatform == this)
 		{
 			return;
 		}
-		OnDetachPortal.RemoveAll(APortalPlatform::BluePlatform);
-		OnAttachPortal.AddUniqueDynamic(this, &APortalPlatform::OffPawnCollision);
-		OnDetachPortal.AddUniqueDynamic(this, &APortalPlatform::OnPawnCollision);
+		InPortal->OnAttachPortal.RemoveAll(APortalPlatform::BluePlatform);
+		InPortal->OnDetachPortal.RemoveAll(APortalPlatform::BluePlatform);
+		InPortal->OnAttachPortal.AddDynamic(this, &APortalPlatform::OffPawnCollision);
+		InPortal->OnDetachPortal.AddDynamic(this, &APortalPlatform::OnPawnCollision);
 		BluePlatform = this;
-		break;
+	}
+	else if (InPortal->ActorHasTag("Orange"))
+	{
+		if (IsValid(OrangePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *OrangePlatform->GetName());
+		if (APortalPlatform::OrangePlatform == this)
+		{
+			return;
+		}
+		InPortal->OnAttachPortal.AddDynamic(this, &APortalPlatform::OffPawnCollision);
+		InPortal->OnDetachPortal.AddDynamic(this, &APortalPlatform::OnPawnCollision);
+		OrangePlatform = this;
 	}
 }
 
-void APortalPlatform::OnPawnCollision()
+void APortalPlatform::OnPawnCollision(APortalPortal* Portal)
 {
-	MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
+	//MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
+	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);
 }
 
-void APortalPlatform::OffPawnCollision()
+void APortalPlatform::OffPawnCollision(APortalPortal* Portal)
 {
-	MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
+	//MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
+	MeshComp->SetCollisionResponseToAllChannels(ECR_Overlap);
 }
 
 #pragma endregion Place
