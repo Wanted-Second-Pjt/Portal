@@ -7,6 +7,11 @@
 #include "Park/Player/PlayerCharacter.h"
 #include "PortalPortal.generated.h"
 
+#pragma region Portal_Interaction
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttachPortal, APortalPortal*, InPortal);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDetachPortal, APortalPortal*, OutPortal);
+#pragma endregion Portal_Interaction
+
 UCLASS(Blueprintable)
 class PORTAL_API APortalPortal : public AActor
 {
@@ -15,6 +20,7 @@ class PORTAL_API APortalPortal : public AActor
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 
 public:	
 	// Sets default values for this actor's properties
@@ -95,8 +101,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PortalDeactivation();
 	
-	
+	UFUNCTION()
+	void OnPortalNoticeObject(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FOnAttachPortal OnAttachPortal;
+
+	UFUNCTION()
+	void OnPortalUnNoticeObject(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FOnDetachPortal OnDetachPortal;
 };
 
 

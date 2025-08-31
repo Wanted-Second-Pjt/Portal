@@ -11,11 +11,13 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kang/PortalPortal.h"
 #include "Park/SceneComponents/PortalComponent.h"
+#include "Utility/DebugHelper.h"
 
 UReplicaSynchroComponent::UReplicaSynchroComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	bSyncMovementState = false; // When Use Anim Inst
 	// Runtime Synchro Status
@@ -43,6 +45,7 @@ void UReplicaSynchroComponent::BeginPlay()
 void UReplicaSynchroComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                               FActorComponentTickFunction* ThisTickFunction)
 {
+	UE_LOG(CustomDebuggingLog, Warning, TEXT("Sync Comp Tick Active;;"));
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (!CurrentReplica || !IsValid(CurrentReplica))
@@ -84,11 +87,10 @@ void UReplicaSynchroComponent::CreateReplica()
 			SpawnedActor->DisableInput(nullptr);
 			if (USkeletalMeshComponent* ReplicaSKM = SpawnedActor->FindComponentByClass<USkeletalMeshComponent>())
 			{
-				UE_LOG(LogTemp, Display, TEXT("Replica SKM Exist"));
+				UE_LOG(CustomDebuggingLog, Display, TEXT("Replica SKM Exist"));
 				ReplicaSKM->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
 				ReplicaSKM->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				ReplicaSKM->SetSimulatePhysics(false);
-				ReplicaSKM->SetCastShadow(true);
 			}
 			
 		};
@@ -96,15 +98,17 @@ void UReplicaSynchroComponent::CreateReplica()
 	FTransform SpawnTransform = GetOwner()->GetActorTransform();
 	SpawnTransform.SetTranslation(SpawnTransform.GetTranslation() + ReplicaSpawnOffset);
 	CurrentReplica = GetWorld()->SpawnActor<AReplicaCharacter>(AReplicaCharacter::StaticClass(), SpawnTransform, SpawnParams);
-	
 	if (IsValid(CurrentReplica))
 	{
-		UE_LOG(LogTemp, Display, TEXT("Replica Character Synced In ReplicaSync Component"));
-		//FOnAttachPortal OnAttachPortal;
-		//FOnDetachPortal OnDetachPortal;
+		UE_LOG(CustomDebuggingLog, Display, TEXT("Replica Character Synced In ReplicaSync Component"));
 		
-		FOnAttachPortal().AddUniqueDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
-		FOnDetachPortal().AddUniqueDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
+		TObjectPtr<APortalPortal> Portal = GetPlayerCharacter()->GetPortalComp()->BluePortal;
+		Portal->OnAttachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
+		Portal->OnDetachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
+		Portal = GetPlayerCharacter()->GetPortalComp()->OrangePortal;
+		Portal->OnAttachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
+		Portal->OnDetachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
+		
 		SetupPortalCamera();
 	}
 }
@@ -113,10 +117,12 @@ void UReplicaSynchroComponent::DestroyReplica()
 {
 	if (CurrentReplica && IsValid(CurrentReplica))
 	{
-		FOnDetachPortal().Broadcast();
-		
-		FOnAttachPortal().RemoveDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
-		FOnDetachPortal().RemoveDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
+		TObjectPtr<APortalPortal> Portal = GetPlayerCharacter()->GetPortalComp()->BluePortal;
+		Portal->OnAttachPortal.RemoveAll(this);
+		Portal->OnDetachPortal.RemoveAll(this);
+		Portal = GetPlayerCharacter()->GetPortalComp()->OrangePortal;
+		Portal->OnAttachPortal.RemoveAll(this);
+		Portal->OnDetachPortal.RemoveAll(this);
 		
 		CurrentReplica->Destroy();
 		CurrentReplica = nullptr;
@@ -157,23 +163,23 @@ void UReplicaSynchroComponent::SyncToReplicaPose(const bool& bLink)
 	
 }
 
-void UReplicaSynchroComponent::OnReplicaVisible()
+void UReplicaSynchroComponent::OnReplicaVisible(APortalPortal* Portal)
 {
 	if (IsValid(CurrentReplica))
 	{
 		//CurrentReplica->TriggerPortalEffect(true);  // AnimInstance
-		CurrentReplica->SetReplicaVisibility(true);
+		CurrentReplica->SetReplicaVisibility(true, Portal);
 		SyncToReplica(true);
 	}
 	
 }
 
-void UReplicaSynchroComponent::OnReplicaInvisible()
+void UReplicaSynchroComponent::OnReplicaInvisible(APortalPortal* Portal)
 {
 	if (IsValid(CurrentReplica))
 	{
 		//CurrentReplica->TriggerPortalEffect(false);  // AnimInstance
-		CurrentReplica->SetReplicaVisibility(false);
+		CurrentReplica->SetReplicaVisibility(false, Portal);
 		SyncToReplica(false);
 	}
 }
@@ -186,7 +192,7 @@ void UReplicaSynchroComponent::SetupPortalCamera()
 		return;
 	}
 
-	UE_LOG(LogTemp, Display, TEXT("Enter Portal Camera Setup"));
+	UE_LOG(CustomDebuggingLog, Display, TEXT("Enter Portal Camera Setup"));
 	TArray<AActor*> Portals;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Portal"), Portals);
 	for (AActor* Portal : Portals)

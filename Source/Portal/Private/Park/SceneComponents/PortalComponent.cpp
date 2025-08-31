@@ -4,9 +4,11 @@
 #include "Park/SceneComponents/PortalComponent.h"
 
 #include "MovieSceneFwd.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "Park/Widget/InGameWidget.h"
 #include "Park/Stuff/PortalPlatform.h"
+#include "Kang/PortalPortal.h"
 //#include "Park/"
 
 
@@ -18,14 +20,28 @@ UPortalComponent::UPortalComponent()
 	
 void UPortalComponent::BeginPlay()
 {
+	Super::BeginPlay();
+	APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner());
+	if (!IsValid(Player))
+	{
+		return;
+	}
 	TArray<AActor*> Portals;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "Portal", Portals);
-	for (AActor* Portal : Portals)
+	for (AActor* Iter : Portals)
 	{
-		if (Portal->FindComponentByClass<UStaticMeshComponent>()->GetMaterial(0))
-		SetOrangePortal(Portal);
+		APortalPortal* Portal = Cast<APortalPortal>(Iter);
+		if (!IsValid(Portal))
+		{
+			continue;
+		}
+		
+		Portal->PortalCamera->ShowOnlyComponents.Add(Player->GetMesh());
+		Portal->PortalCamera->HideComponent(Player->GetVisibleMeshComp());
+		Portal->ActorHasTag("Blue") ?
+			BluePortal = Portal : OrangePortal = Portal;
+		
 	}
-	Super::BeginPlay();
 	AimWidget->AddToViewport(0);
 }
 

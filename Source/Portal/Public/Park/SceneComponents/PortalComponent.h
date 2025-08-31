@@ -6,13 +6,9 @@
 #include "Components/SceneComponent.h"
 #include "PortalComponent.generated.h"
 
-#pragma region Portal_Interaction
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnAttachPortal);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDetachPortal);
-#pragma endregion Portal_Interaction
-
 class UCameraComponent;
 class APortalPlatform;
+class APortalPortal;
 class UInGameWidget;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -30,9 +26,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Enter")
 	FORCEINLINE void SetPortalWeak(AActor* InPortal) { this->WeakPortal = InPortal; }
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetOrangePortal(AActor* InPortal) { this->OrangePortal = InPortal; }
+	FORCEINLINE void SetOrangePortal(APortalPortal* InPortal) { this->OrangePortal = InPortal; }
 	UFUNCTION(BlueprintCallable)
-	FORCEINLINE void SetBluePortal(AActor* InPortal) { this->BluePortal = InPortal; }
+	FORCEINLINE void SetBluePortal(APortalPortal* InPortal) { this->BluePortal = InPortal; }
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE void SetAimWidget(UInGameWidget* InGameWidget) { AimWidget = InGameWidget; }
@@ -42,12 +38,6 @@ protected:
 
 	virtual void BeginPlay() override;
 
-public:
-	UPROPERTY(BlueprintAssignable, Category = "Player Portal Events")
-	FOnAttachPortal OnAttachPortal;
-	
-	UPROPERTY(BlueprintAssignable, Category = "Player Portal Events")
-	FOnDetachPortal OnDetachPortal;
 
 protected:
 	FCollisionQueryParams Params;
@@ -55,13 +45,13 @@ protected:
 	UPROPERTY(EditAnywhere)
 	UInGameWidget* AimWidget;
 	
-private:
+public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	TWeakObjectPtr<AActor> WeakPortal;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	TObjectPtr<AActor> BluePortal;
+	TObjectPtr<APortalPortal> BluePortal;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
-	TObjectPtr<AActor> OrangePortal;
+	TObjectPtr<APortalPortal> OrangePortal;
 };

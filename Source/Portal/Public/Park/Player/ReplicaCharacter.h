@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "ReplicaCharacter.generated.h"
 
+class APortalPortal;
+
 USTRUCT(BlueprintType)
 struct FReplicaAnimationData
 {
@@ -68,7 +70,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	//virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 	
 	// for DeActivating
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -78,7 +80,7 @@ public:
 	void InitializeAsReplica();
 	
 	UFUNCTION(BlueprintCallable, Category = "Replica")
-	void SetReplicaVisibility(bool bVisible);
+	void SetReplicaVisibility(bool bVisible, APortalPortal* Portal);
 	
 	UFUNCTION(BlueprintPure, Category = "Replica")
 	bool IsReplicaVisible() const { return bReplicaVisible; }
@@ -117,6 +119,9 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
 	bool bReplicaVisible;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
+	APortalPortal* LinkedPortal = nullptr;
 #pragma endregion Replica
 
 	

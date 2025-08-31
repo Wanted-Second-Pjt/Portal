@@ -1,17 +1,20 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Park/Player/ReplicaCharacter.h"
+#include "Kang/PortalPortal.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/Engine.h"
 #include "Park/ActorComponents/ReplicaSynchroComponent.h"
 #include "Park/Animation/ReplicaAnimInstance.h"
+#include "Utility/DebugHelper.h"
 
 AReplicaCharacter::AReplicaCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	
 	bDisableCollisionOnSpawn = true;
 	bDisableInputOnSpawn = true;
@@ -30,12 +33,20 @@ void AReplicaCharacter::BeginPlay()
 	InitializeAsReplica();
 }
 
-/*
 void AReplicaCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!bReplicaVisible || !IsValid(LinkedPortal))
+	{
+		return;
+	}
+	
+	const FVector NewActorLocation = LinkedPortal->PortalCamera->GetComponentLocation() +
+		(GetActorLocation() - GetMesh()->GetSocketLocation("CameraSocket"));
+	//const FRotator NewActorRotation = LinkedPortal->PortalCamera->GetComponentRotation() + FRotator(0.f, 90.f, 0.f);
+	SetActorLocation(NewActorLocation);
+	//SetActorRotation(NewActorRotation);
 }
-*/
 
 void AReplicaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -96,10 +107,12 @@ void AReplicaCharacter::InitializeAsReplica()
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		MeshComp->SetSimulatePhysics(false);
 
-		MeshComp->SetCastShadow(bEnableShadowCasting);
+		MeshComp->SetCastShadow(false);
 
 		MeshComp->SetComponentTickEnabled(true);
-		MeshComp->bTickInEditor = false;
+
+		MeshComp->bCastDynamicShadow = false;
+		MeshComp->CastShadow = false;
 	}
 	
 	Tags.AddUnique(TEXT("PortalReplica"));
@@ -107,11 +120,19 @@ void AReplicaCharacter::InitializeAsReplica()
 	SetActorLabel(TEXT("PortalReplica"));
 }
 
-void AReplicaCharacter::SetReplicaVisibility(bool bVisible)
+void AReplicaCharacter::SetReplicaVisibility(bool bVisible, APortalPortal* Portal)
 {
 	bReplicaVisible = bVisible;
 	SetActorHiddenInGame(!bVisible);
-	UE_LOG(LogTemp, Display, TEXT("ReplicaVisibility : %d"), bVisible);
+	GetMesh()->CastShadow = bVisible;
+	if (bVisible && IsValid(Portal))
+	{
+		LinkedPortal = Portal->LinkedPortal;
+	}
+	else if (bVisible)
+	{
+		LinkedPortal = nullptr;
+	}
 }
 
 
@@ -132,7 +153,10 @@ void AReplicaCharacter::UpdateAnimationData(const FReplicaAnimationData& AnimDat
 void AReplicaCharacter::TriggerPortalEffect(bool bEntering)
 {
 	//OnPortalEffectTriggered(bEntering);
-	SetReplicaVisibility(bEntering);
+	if (IsValid(LinkedPortal))
+	{
+		SetReplicaVisibility(bEntering, LinkedPortal);
+	}
 }
 
 

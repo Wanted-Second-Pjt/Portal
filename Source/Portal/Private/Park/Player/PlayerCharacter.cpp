@@ -26,40 +26,32 @@ APlayerCharacter::APlayerCharacter()
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	CapsuleComp = Helper::CreateSceneComponent<UCapsuleComponent>(this, "CapsuleComp");
-	SetRootComponent(CapsuleComp);
-	CapsuleComp->SetCapsuleHalfHeight(100.f);
-	CapsuleComp->SetCapsuleRadius(40.f);
-	CapsuleComp->SetLineThickness(1.0f);
-
-	if (SkeletalComp = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMeshComp");
-		IsValid(SkeletalComp))
-	{
-		SkeletalComp->SetSkeletalMeshAsset(Helper::GetAssetFromConstructor<USkeletalMesh>(
+	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
+	
+	GetMesh()->SetSkeletalMeshAsset(Helper::GetAssetFromConstructor<USkeletalMesh>(
 			"/Game/Park/Character/ControlRig/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"
-		));
-		SkeletalComp->SetupAttachment(CapsuleComp);
-		SkeletalComp->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
+	));
+	
+	if (IsValid(GetMesh()->GetSkeletalMeshAsset()))
+	{
+		SetupInvisibleMesh();
+	
+		if (CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
+			IsValid(CameraComp))
+		{
+			SetupCamera();
+			CameraComp->SetupAttachment(GetRootComponent());
+			SetupVisibleMesh();
+		}
+		
+		PortalComp = CreateDefaultSubobject<UPortalComponent>("PortalComp");
+		PortalComp->SetupAttachment(CameraComp);
 	}
 	
-	if (CameraComp = CreateDefaultSubobject<UCameraComponent>("CameraComp");
-		IsValid(CameraComp))
-	{
-		SetupCamera();
-		CameraComp->SetupAttachment(SkeletalComp, FName("CameraSocket"));
-	}
-
-	if (TSubclassOf<UAnimInstance> TempAnimInstance = Helper::GetClassFromConstructor<UAnimInstance>(TEXT("/Game/Park/Character/ControlRig/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C")))		
-	{
-		SkeletalComp->SetAnimInstanceClass(TempAnimInstance);
-	}
-	PortalComp = CreateDefaultSubobject<UPortalComponent>("PortalComp");
-	PortalComp->SetupAttachment(CameraComp);
-	
-
 	ControlComp = Helper::CreateActorComponent<UControlComponent>(this, "ControlComp");
 	EquipmentComp = Helper::CreateActorComponent<UEquipmentComponent>(this, "EquipmentComp");
-	MovementComp = Helper::CreateActorComponent<UPlayerMovementComponent>(this, "MovementComp");
+	//MovementComp = Helper::CreateActorComponent<UCharacterMovementComponent>(this, "MovementComp");
+	//MovementComp = Helper::CreateActorComponent<UPlayerMovementComponent>(this, "MovementComp");
 	ReplicaSynchroComp = Helper::CreateActorComponent<UReplicaSynchroComponent>(this, "ReplicaSynchroComp");
 	
 }
@@ -90,29 +82,30 @@ void APlayerCharacter::Tick(float DeltaTime)
 	if (ControlComp->GetEnableInput())
 	{
 		#pragma region Movement
-		MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
+		//MovementComp->AddInputVector(FVector(ControlComp->GetDirection(), 0));
+		AddMovementInput(FVector(ControlComp->GetDirection(), 0));
 		if (ControlComp->PressedSpaceBar())
 		{
-			MovementComp->Jump();
+			Jump();
 		}
 		#pragma endregion Movement
 
 		#pragma region Able Portal
 		if (LIKELY(IsValid(PortalComp) && IsValid(CameraComp)))
 		{
-			if (IsValid(WeaponComp))
-			{
-				const bool bEnablePortal = PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
-				if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
-				{
-					WeaponComp->Fire();
-				}
-				if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
-				{
-					WeaponComp->Fire();
-				}
-				
-			}
+			//if (IsValid(WeaponComp))
+			//{
+			//	const bool bEnablePortal = PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
+			//	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
+			//	{
+			//		WeaponComp->Fire();
+			//	}
+			//	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
+			//	{
+			//		WeaponComp->Fire();
+			//	}
+			//	
+			//}
 		}
 		#pragma endregion Able Portal
 	}
@@ -125,6 +118,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+	PlayerController->HiddenPrimitiveComponents.Add(GetMesh());
 	ControlComp->SetController(PlayerController);
 	AutoPossessPlayer = EAutoReceiveInput::Type::Player0;
 	//PlayerController->HiddenActors.Add(this);
@@ -133,6 +127,38 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 void APlayerCharacter::SetupCamera()
 {
 	CameraComp->SetFieldOfView(90.f);
+	CameraComp->bUsePawnControlRotation	= true;
+	bUseControllerRotationPitch = false;  
+	bUseControllerRotationYaw = true;     
+	bUseControllerRotationRoll = false;
+	CameraComp->SetHiddenInGame(true);
+
+	CameraComp->SetWorldLocation(GetMesh()->GetSocketLocation(FName("CameraSocket")));
+}
+
+void APlayerCharacter::SetupInvisibleMesh()
+{
+	GetMesh()->SetCastShadow(true);
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
+	GetMesh()->SetupAttachment(GetRootComponent());
+	if (TSubclassOf<UAnimInstance> TempAnimInstance = Helper::GetClassFromConstructor<UAnimInstance>(TEXT("/Game/Park/Character/ControlRig/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C")))		
+	{
+		GetMesh()->SetAnimInstanceClass(TempAnimInstance);
+	}
+}
+
+void APlayerCharacter::SetupVisibleMesh()
+{
+	VisibleSkeletalComp = CreateDefaultSubobject<USkeletalMeshComponent> ("VisibleMesh");
+	VisibleSkeletalComp->SetupAttachment(CameraComp);
+	VisibleSkeletalComp->SetSkeletalMesh(Helper::GetAssetFromConstructor<USkeletalMesh>("/Game/FirstPersonArms/Character/Mesh/SK_Mannequin_Arms.SK_Mannequin_Arms"));
+	VisibleSkeletalComp->SetAnimInstanceClass(Helper::GetClassFromConstructor<UAnimInstance>("/Game/FirstPersonArms/Animations/FirstPerson_AnimBP.FirstPerson_AnimBP_C"));
+	VisibleSkeletalComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	VisibleSkeletalComp->SetSimulatePhysics(false);
+	VisibleSkeletalComp->SetOnlyOwnerSee(true);
+	VisibleSkeletalComp->bCastDynamicShadow = false;
+	VisibleSkeletalComp->CastShadow = false;
+	VisibleSkeletalComp->SetRelativeLocation(FVector(-30.f, 0.f, -151.f));
 }
 
 

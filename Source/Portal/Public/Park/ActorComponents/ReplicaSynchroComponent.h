@@ -35,10 +35,10 @@ public:
 	AReplicaCharacter* GetCurrentReplica() const { return CurrentReplica; }
 
 	UFUNCTION(BlueprintCallable, Category = "Portal")
-	void OnReplicaVisible();
+	void OnReplicaVisible(APortalPortal* Portal);
 	
 	UFUNCTION(BlueprintCallable, Category = "Portal") 
-	void OnReplicaInvisible();
+	void OnReplicaInvisible(APortalPortal* Portal);
 
 protected:
 	
