@@ -4,7 +4,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "PhysicsEngine/PhysicsSettings.h"
-#include "Utility/DebugHelper.h"
+//#include "Utility/DebugHelper.h"
 #include "Engine/World.h"
 #include "Components/PrimitiveComponent.h"
 

@@ -84,13 +84,11 @@ private:
 #pragma endregion Synchro
 	
 	UPROPERTY()
-	TObjectPtr<class UPlayerMovementComponent> MovementComp;
+	TObjectPtr<class UCharacterMovementComponent> MovementComp;
 	
 	UPROPERTY()
 	TObjectPtr<class UControlComponent> ControlComp;
 	
-	UPROPERTY()
-	TObjectPtr<class UEquipmentComponent> EquipmentComp;
 
 public:
 	

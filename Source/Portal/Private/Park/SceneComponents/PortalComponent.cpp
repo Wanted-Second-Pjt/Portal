@@ -9,13 +9,13 @@
 #include "Park/Widget/InGameWidget.h"
 #include "Park/Stuff/PortalPlatform.h"
 #include "Kang/PortalPortal.h"
-//#include "Park/"
 
 
 UPortalComponent::UPortalComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	Params.AddIgnoredActor(GetOwner());
+	//Params.TraceTag = 
 }
 	
 void UPortalComponent::BeginPlay()
@@ -45,14 +45,24 @@ void UPortalComponent::BeginPlay()
 	AimWidget->AddToViewport(0);
 }
 
-bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance)
+bool UPortalComponent::GetHitResultFromPlatform(const FVector& StartPos, const FVector& Direction, float TraceDistance)
 {
+
+	if (!HasPortalGun)
+	{
+		if (IsValid(AimWidget))
+		{
+			AimWidget->SetEnableOrange(false);
+			AimWidget->SetEnableBlue(false);
+		}
+		return false;
+	}
 	FHitResult HitResult;
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		StartPos,
-		EndPos,
+		StartPos + Direction * TraceDistance,
 		ECC_Visibility,
 		Params
 	);

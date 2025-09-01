@@ -54,9 +54,6 @@ public:
 	FORCEINLINE UControlComponent* GetControlComp() const { return ControlComp; }
 	
 	UFUNCTION(BlueprintPure, Category = "Components")
-	FORCEINLINE UEquipmentComponent* GetEquipmentComp() const { return EquipmentComp; }
-	
-	UFUNCTION(BlueprintPure, Category = "Components")
 	FORCEINLINE UCharacterMovementComponent* GetMovementComp() const { return GetCharacterMovement(); }
 	//FORCEINLINE UPlayerMovementComponent* GetMovementComp() const { return MovementComp; }
 	
@@ -83,15 +80,9 @@ private:
 	TObjectPtr<USkeletalMeshComponent> VisibleSkeletalComp;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UCameraComponent> CameraComp;
-
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UControlComponent> ControlComp;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<UEquipmentComponent> EquipmentComp;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
-	TObjectPtr<UCharacterMovementComponent> MovementComp;
-	//TObjectPtr<UPlayerMovementComponent> MovementComp;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess))
 	TObjectPtr<UReplicaSynchroComponent> ReplicaSynchroComp;
 	

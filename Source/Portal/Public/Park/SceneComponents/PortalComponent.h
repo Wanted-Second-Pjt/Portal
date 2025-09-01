@@ -21,7 +21,7 @@ public:
 	UPortalComponent();
 
 	UFUNCTION(BlueprintCallable, Category="Check")
-	bool GetHitResultFromPlatform(const FVector& StartPos, const FVector& EndPos, float TraceDistance = 5000.f);
+	bool GetHitResultFromPlatform(const FVector& StartPos, const FVector& Direction, float TraceDistance = 5000.f);
 	
 	UFUNCTION(BlueprintCallable, Category="Enter")
 	FORCEINLINE void SetPortalWeak(AActor* InPortal) { this->WeakPortal = InPortal; }
@@ -46,6 +46,9 @@ protected:
 	UInGameWidget* AimWidget;
 	
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool HasPortalGun = false;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess))
 	TWeakObjectPtr<AActor> WeakPortal;
 

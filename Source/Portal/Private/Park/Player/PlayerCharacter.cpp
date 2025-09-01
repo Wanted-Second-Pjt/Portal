@@ -49,9 +49,6 @@ APlayerCharacter::APlayerCharacter()
 	}
 	
 	ControlComp = Helper::CreateActorComponent<UControlComponent>(this, "ControlComp");
-	EquipmentComp = Helper::CreateActorComponent<UEquipmentComponent>(this, "EquipmentComp");
-	//MovementComp = Helper::CreateActorComponent<UCharacterMovementComponent>(this, "MovementComp");
-	//MovementComp = Helper::CreateActorComponent<UPlayerMovementComponent>(this, "MovementComp");
 	ReplicaSynchroComp = Helper::CreateActorComponent<UReplicaSynchroComponent>(this, "ReplicaSynchroComp");
 	
 }
@@ -60,7 +57,7 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Tags.Add("Player");
 }
 
 // Called every frame
@@ -93,19 +90,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 		#pragma region Able Portal
 		if (LIKELY(IsValid(PortalComp) && IsValid(CameraComp)))
 		{
-			//if (IsValid(WeaponComp))
-			//{
-			//	const bool bEnablePortal = PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
-			//	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseLeft())
-			//	{
-			//		WeaponComp->Fire();
-			//	}
-			//	if (EquipmentComp->bEquipSomething && ControlComp->PressedMouseRight())
-			//	{
-			//		WeaponComp->Fire();
-			//	}
-			//	
-			//}
+			PortalComp->GetHitResultFromPlatform(CameraComp->GetComponentLocation(), CameraComp->GetForwardVector());
+			
 		}
 		#pragma endregion Able Portal
 	}

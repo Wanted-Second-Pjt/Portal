@@ -5,7 +5,7 @@
 
 #include "Kang/PortalPortal.h"
 #include "Kismet/GameplayStatics.h"
-#include "Utility/DebugHelper.h"
+//#include "Utility/DebugHelper.h"
 
 TObjectPtr<APortalPlatform> APortalPlatform::OrangePlatform = nullptr;
 TObjectPtr<APortalPlatform> APortalPlatform::BluePlatform = nullptr;
@@ -96,14 +96,14 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 	FVector PortalUp = FVector::CrossProduct(HitNormal, CamRightVector);
 	FVector PortalRight = FVector::CrossProduct(HitNormal, PortalUp);
 	FRotator NRotator = FMatrix(HitNormal, PortalRight, PortalUp, FVector::ZeroVector).Rotator();
-	//InPortal->SetActorRotation(NRotator);
+	InPortal->SetActorRotation(NRotator);
 	InPortal->SetActorRelativeRotation(NRotator);
 	InPortal->SetActorLocation(HitLocation + HitNormal * 5.f);
-
+	
 	AddToPlayerInteractionDelegate(InPortal);
 
 	
-	return;
+	//return;
 	
 	FVector PortalExtent = InPortal->GetComponentByClass<UStaticMeshComponent>()->GetPlacementExtent().GetBox().GetExtent();
 	FVector2D LocalPortalExtent = FVector2D(InversedTransform.InverseTransformVector(PortalExtent));
@@ -134,14 +134,14 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 			AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
 		}
 	}
-	DEBUG_HELPER_PRINT_VECTOR(FVector(ValidRange, 0));
+	//DEBUG_HELPER_PRINT_VECTOR(FVector(ValidRange, 0));
 	FRotator NewRotator = FMatrix(HitNormal, PortalRight, PortalUp, FVector::ZeroVector).Rotator();
 	if (ValidRange.X > 0.f && ValidRange.Y > 0.f)
 	{
 		if (InPortal)
 		{
-			DEBUG_HELPER_PRINT_LINE();
-			InPortal->SetActorLocationAndRotation(HitLocation, NewRotator);
+			//DEBUG_HELPER_PRINT_LINE();
+			InPortal->SetActorLocationAndRotation(HitLocation + HitNormal * 5.f, NewRotator);
 		}
 		return;
 	}
@@ -164,23 +164,24 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 	{
 		NewLocalLocation = FVector::ZeroVector;
 	}
-	FVector NewWorldLocation = GetActorTransform().TransformPosition(NewLocalLocation);
-	DEBUG_HELPER_PRINT_VECTOR(NewWorldLocation);
+	FVector NewWorldLocation = GetActorTransform().TransformPosition(NewLocalLocation) + HitNormal * 5.f;
+	//DEBUG_HELPER_PRINT_VECTOR(NewWorldLocation);
 	
 	
 	if (InPortal)
 	{
-		DEBUG_HELPER_PRINT_INSTANCE();
+		//DEBUG_HELPER_PRINT_INSTANCE();
 		InPortal->SetActorLocationAndRotation(NewWorldLocation, NewRotator);
 		return;
 	}
+	
 }
 
 void APortalPlatform::AddToPlayerInteractionDelegate(APortalPortal* InPortal)
 {
 	if (InPortal->ActorHasTag("Blue"))
 	{
-		if (IsValid(BluePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *BluePlatform->GetName());
+		//if (IsValid(BluePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *BluePlatform->GetName());
 		if (APortalPlatform::BluePlatform == this)
 		{
 			return;
@@ -193,7 +194,7 @@ void APortalPlatform::AddToPlayerInteractionDelegate(APortalPortal* InPortal)
 	}
 	else if (InPortal->ActorHasTag("Orange"))
 	{
-		if (IsValid(OrangePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *OrangePlatform->GetName());
+		//if (IsValid(OrangePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *OrangePlatform->GetName());
 		if (APortalPlatform::OrangePlatform == this)
 		{
 			return;
