@@ -10,7 +10,7 @@
 #include "Engine/Engine.h"
 #include "Park/ActorComponents/ReplicaSynchroComponent.h"
 #include "Park/Animation/ReplicaAnimInstance.h"
-#include "Utility/DebugHelper.h"
+//#include "Utility/DebugHelper.h"
 
 AReplicaCharacter::AReplicaCharacter()
 {
@@ -85,7 +85,7 @@ void AReplicaCharacter::InitializeAsReplica()
 		
 		if (UCapsuleComponent* CapsuleComp = GetCapsuleComponent())
 		{
-			UE_LOG(LogTemp, Display, TEXT("CapsuleComponent is now null"));
+			//UE_LOG(LogTemp, Display, TEXT("CapsuleComponent is now null"));
 			CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
@@ -94,7 +94,7 @@ void AReplicaCharacter::InitializeAsReplica()
 	{
 		if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
 		{
-			UE_LOG(LogTemp, Display, TEXT("MovementComponent is now null"));
+			//UE_LOG(LogTemp, Display, TEXT("MovementComponent is now null"));
 			MovementComp->SetComponentTickEnabled(false);
 			MovementComp->SetUpdatedComponent(nullptr);
 			MovementComp->Deactivate();
@@ -103,7 +103,7 @@ void AReplicaCharacter::InitializeAsReplica()
 
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		UE_LOG(LogTemp, Display, TEXT("MeshComponent is now off"));
+		//UE_LOG(LogTemp, Display, TEXT("MeshComponent is now off"));
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		MeshComp->SetSimulatePhysics(false);
 
@@ -129,7 +129,7 @@ void AReplicaCharacter::SetReplicaVisibility(bool bVisible, APortalPortal* Porta
 	{
 		LinkedPortal = Portal->LinkedPortal;
 	}
-	else if (bVisible)
+	else
 	{
 		LinkedPortal = nullptr;
 	}
@@ -155,7 +155,7 @@ void AReplicaCharacter::TriggerPortalEffect(bool bEntering)
 	//OnPortalEffectTriggered(bEntering);
 	if (IsValid(LinkedPortal))
 	{
-		SetReplicaVisibility(bEntering, LinkedPortal);
+		// Enter Portal Effect...Someday..
 	}
 }
 

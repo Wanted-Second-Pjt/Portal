@@ -5,7 +5,6 @@
 #include "EngineUtils.h"
 #include "Park/Player/PlayerCharacter.h"
 #include "Park/ActorComponents/ControlComponent.h"
-#include "Park/ActorComponents/EquipmentComponent.h"
 #include "Park/RelatedPhysics/PlayerMovementComponent.h"
 #include "Park/Player/ReplicaCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -13,7 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kang/PortalPortal.h"
 #include "Park/SceneComponents/PortalComponent.h"
-#include "Utility/DebugHelper.h"
+//#include "Utility/DebugHelper.h"
 
 UReplicaSynchroComponent::UReplicaSynchroComponent()
 {
@@ -34,9 +33,8 @@ void UReplicaSynchroComponent::BeginPlay()
 	// Comp Var for Using Usually
 	if (IsValid(GetOwner()))
 	{
-		MovementComp = GetOwner()->FindComponentByClass<UPlayerMovementComponent>();
-		ControlComp = GetOwner()->FindComponentByClass<UControlComponent>();
-		EquipmentComp = GetOwner()->FindComponentByClass<UEquipmentComponent>();
+		MovementComp = GetPlayerCharacter()->GetCharacterMovement();
+		ControlComp = GetPlayerCharacter()->GetControlComp();
 	}
 	
 	CreateReplica();
@@ -45,7 +43,7 @@ void UReplicaSynchroComponent::BeginPlay()
 void UReplicaSynchroComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                               FActorComponentTickFunction* ThisTickFunction)
 {
-	UE_LOG(CustomDebuggingLog, Warning, TEXT("Sync Comp Tick Active;;"));
+	//UE_LOG(CustomDebuggingLog, Warning, TEXT("Sync Comp Tick Active;;"));
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (!CurrentReplica || !IsValid(CurrentReplica))
@@ -87,7 +85,7 @@ void UReplicaSynchroComponent::CreateReplica()
 			SpawnedActor->DisableInput(nullptr);
 			if (USkeletalMeshComponent* ReplicaSKM = SpawnedActor->FindComponentByClass<USkeletalMeshComponent>())
 			{
-				UE_LOG(CustomDebuggingLog, Display, TEXT("Replica SKM Exist"));
+				//UE_LOG(CustomDebuggingLog, Display, TEXT("Replica SKM Exist"));
 				ReplicaSKM->SetSkeletalMesh(GetPlayerCharacter()->GetSkeletalComp()->GetSkeletalMeshAsset());
 				ReplicaSKM->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				ReplicaSKM->SetSimulatePhysics(false);
@@ -100,14 +98,14 @@ void UReplicaSynchroComponent::CreateReplica()
 	CurrentReplica = GetWorld()->SpawnActor<AReplicaCharacter>(AReplicaCharacter::StaticClass(), SpawnTransform, SpawnParams);
 	if (IsValid(CurrentReplica))
 	{
-		UE_LOG(CustomDebuggingLog, Display, TEXT("Replica Character Synced In ReplicaSync Component"));
+		//UE_LOG(CustomDebuggingLog, Display, TEXT("Replica Character Synced In ReplicaSync Component"));
 		
-		TObjectPtr<APortalPortal> Portal = GetPlayerCharacter()->GetPortalComp()->BluePortal;
-		Portal->OnAttachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
-		Portal->OnDetachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
-		Portal = GetPlayerCharacter()->GetPortalComp()->OrangePortal;
-		Portal->OnAttachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
-		Portal->OnDetachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
+		TObjectPtr<APortalPortal> BluePortal = GetPlayerCharacter()->GetPortalComp()->BluePortal;
+		BluePortal->OnAttachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
+		BluePortal->OnDetachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
+		TObjectPtr<APortalPortal> OrangePortal = GetPlayerCharacter()->GetPortalComp()->OrangePortal;
+		OrangePortal->OnAttachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaVisible);
+		OrangePortal->OnDetachPortal.AddDynamic(this, &UReplicaSynchroComponent::OnReplicaInvisible);
 		
 		SetupPortalCamera();
 	}
@@ -117,12 +115,12 @@ void UReplicaSynchroComponent::DestroyReplica()
 {
 	if (CurrentReplica && IsValid(CurrentReplica))
 	{
-		TObjectPtr<APortalPortal> Portal = GetPlayerCharacter()->GetPortalComp()->BluePortal;
-		Portal->OnAttachPortal.RemoveAll(this);
-		Portal->OnDetachPortal.RemoveAll(this);
-		Portal = GetPlayerCharacter()->GetPortalComp()->OrangePortal;
-		Portal->OnAttachPortal.RemoveAll(this);
-		Portal->OnDetachPortal.RemoveAll(this);
+		TObjectPtr<APortalPortal> BluePortal = GetPlayerCharacter()->GetPortalComp()->BluePortal;
+		BluePortal->OnAttachPortal.RemoveAll(this);
+		BluePortal->OnDetachPortal.RemoveAll(this);
+		TObjectPtr<APortalPortal> OrangePortal = GetPlayerCharacter()->GetPortalComp()->OrangePortal;
+		OrangePortal->OnAttachPortal.RemoveAll(this);
+		OrangePortal->OnDetachPortal.RemoveAll(this);
 		
 		CurrentReplica->Destroy();
 		CurrentReplica = nullptr;
@@ -138,12 +136,12 @@ void UReplicaSynchroComponent::SyncToReplica(const bool& bLink)
 	
 	if (bSyncMovementState)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Replica Synchronization State : Anim Inst"));
+		//UE_LOG(LogTemp, Display, TEXT("Replica Synchronization State : Anim Inst"));
 		SyncMovementData(); // Update data, Replica will pull when Needed
 		return;
 	}
 	
-	UE_LOG(LogTemp, Display, TEXT("Replica Synchronization State : Pose"));
+	//UE_LOG(LogTemp, Display, TEXT("Replica Synchronization State : Pose"));
 	SyncToReplicaPose(bLink);
 }
 
@@ -192,14 +190,14 @@ void UReplicaSynchroComponent::SetupPortalCamera()
 		return;
 	}
 
-	UE_LOG(CustomDebuggingLog, Display, TEXT("Enter Portal Camera Setup"));
+	//UE_LOG(CustomDebuggingLog, Display, TEXT("Enter Portal Camera Setup"));
 	TArray<AActor*> Portals;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("Portal"), Portals);
 	for (AActor* Portal : Portals)
 	{
 		if (USceneCaptureComponent2D* SceneCapture = Portal->FindComponentByClass<USceneCaptureComponent2D>())
 		{
-			UE_LOG(LogTemp, Display, TEXT("Find Success Portal Camera"));
+			//UE_LOG(LogTemp, Display, TEXT("Find Success Portal Camera"));
 			//SceneCapture->HiddenActors.Empty();
 			SceneCapture->HiddenActors.AddUnique(CurrentReplica);
 			
@@ -221,20 +219,15 @@ void UReplicaSynchroComponent::SyncMovementData()
 	
 	FReplicaAnimationData AnimData;
 	
-	FVector Velocity = MovementComp->GetCurrentVelocity();
+	FVector Velocity = MovementComp->GetLastUpdateVelocity();
 	AnimData.MovementSpeed = Velocity.Size();
 	AnimData.NormalizedSpeed = FMath::Clamp(AnimData.MovementSpeed / MovementComp->MaxWalkSpeed, 0.0f, 1.0f);
 	AnimData.MovementDirection = ControlComp->GetDirection();
-	AnimData.bIsOnGround = MovementComp->IsOnGround();
+	AnimData.bIsOnGround = MovementComp->IsMovingOnGround();
 	AnimData.VerticalSpeed = Velocity.Z;
 	
 	AnimData.bIsJumping = !AnimData.bIsOnGround && Velocity.Z > 0;
 	AnimData.bIsFalling = !AnimData.bIsOnGround && Velocity.Z < 0;
-	
-	if (EquipmentComp)
-	{
-		AnimData.bHasWeapon = EquipmentComp->bEquipSomething;
-	}
 	
 	AnimData.WeaponBobIntensity = FMath::Clamp(AnimData.MovementSpeed / MovementComp->MaxWalkSpeed, 0.0f, 1.0f);
 	

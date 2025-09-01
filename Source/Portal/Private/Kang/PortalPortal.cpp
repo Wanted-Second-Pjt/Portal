@@ -7,7 +7,7 @@
 #include "Components/SceneCaptureComponent2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "Park/Stuff/PortalPlatform.h"
-#include "Utility/DebugHelper.h"
+//#include "Utility/DebugHelper.h"
 
 
 // Sets default values
@@ -46,11 +46,11 @@ void APortalPortal::Tick(float DeltaTime)
 
 void APortalPortal::OnPortalNoticeObject(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	UE_LOG(CustomDebuggingLog, Warning, TEXT("OtherActor : %s"), *OtherActor->GetClass()->GetName());
+	//UE_LOG(CustomDebuggingLog, Warning, TEXT("OtherActor : %s"), *OtherActor->GetClass()->GetName());
 	
 	if (OtherActor->GetClass() == GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass())
 	{
-		UE_LOG(CustomDebuggingLog, Warning, TEXT("Player : %s"), *GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass()->GetName());
+		//UE_LOG(CustomDebuggingLog, Warning, TEXT("Player : %s"), *GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass()->GetName());
 		OnAttachPortal.Broadcast(this);
 	}
 }

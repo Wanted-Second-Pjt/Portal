@@ -1,6 +1,6 @@
 ﻿#include "Park/ActorComponents/ControlComponent.h"
 #include "GameFramework/PlayerController.h"
-#include "Utility/DebugHelper.h"
+//include "Utility/DebugHelper.h"
 
 DECLARE_DELEGATE(LeftAction);
 DECLARE_DELEGATE(RightAction);
