@@ -95,12 +95,13 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 	
 	FVector PortalUp = FVector::CrossProduct(HitNormal, CamRightVector);
 	FVector PortalRight = FVector::CrossProduct(HitNormal, PortalUp);
-	FRotator NRotator = FMatrix(HitNormal, PortalRight, PortalUp, FVector::ZeroVector).Rotator();
-	InPortal->SetActorRotation(NRotator);
+	//FRotator NRotator = FMatrix(HitNormal, PortalRight, PortalUp, FVector::ZeroVector).Rotator();
+	/*InPortal->SetActorRotation(NRotator);
 	InPortal->SetActorRelativeRotation(NRotator);
 	InPortal->SetActorLocation(HitLocation + HitNormal * 5.f);
 	
 	AddToPlayerInteractionDelegate(InPortal);
+	*/
 
 	
 	//return;
@@ -135,6 +136,11 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 		}
 	}
 	//DEBUG_HELPER_PRINT_VECTOR(FVector(ValidRange, 0));
+	if (PortalUp.Z < 0.f)
+	{
+		PortalUp = -PortalUp;
+		PortalRight = -PortalRight;
+	}
 	FRotator NewRotator = FMatrix(HitNormal, PortalRight, PortalUp, FVector::ZeroVector).Rotator();
 	if (ValidRange.X > 0.f && ValidRange.Y > 0.f)
 	{

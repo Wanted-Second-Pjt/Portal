@@ -30,7 +30,7 @@ private:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = Physics)
-	float GravityScale = -1524.0f;
+	float GravityScale = -1224.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = Physics)
 	float TerminalVelocity = 6667.0f;
