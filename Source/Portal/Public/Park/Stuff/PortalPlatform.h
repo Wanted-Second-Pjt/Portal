@@ -20,7 +20,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick( float DeltaSeconds ) override;
 
 #pragma region PortalPlacement
 public:
@@ -33,9 +32,9 @@ public:
 protected:
 	void AddToPlayerInteractionDelegate(APortalPortal* InPortal);
 	
-	UFUNCTION(BlueprintCallable, Category="Player")
+	UFUNCTION(Category="Player")
 	void OnPawnCollision(APortalPortal* Portal);
-	UFUNCTION(BlueprintCallable, Category="Player")
+	UFUNCTION(Category="Player")
 	void OffPawnCollision(APortalPortal* Portal);
 	
 #pragma endregion PortalPlacement

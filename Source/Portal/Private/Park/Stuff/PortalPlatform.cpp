@@ -37,6 +37,7 @@ void APortalPlatform::BeginPlay()
 	PortalMeshComp = nullptr;
 	Super::BeginPlay();
 	
+	
 	APortalPortal* Portal = Cast<APortalPortal>(UGameplayStatics::GetActorOfClass(GetWorld(), PortalClass));
 
 	TArray<UStaticMeshComponent*> PortalMeshComps;
@@ -53,14 +54,9 @@ void APortalPlatform::BeginPlay()
 	if (IsValid(MeshComp->GetStaticMesh()))
 	{
 		LocalBoxExtent = MeshComp->GetStaticMesh()->GetBoundingBox().GetExtent();
+		MeshComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	}
 
-}
-
-void APortalPlatform::Tick(float DeltaSeconds)
-{
-	Super::Tick(DeltaSeconds);
-	
 }
 
 #pragma region Place
@@ -95,12 +91,12 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 	
 	FVector PortalUp = FVector::CrossProduct(HitNormal, CamRightVector);
 	FVector PortalRight = FVector::CrossProduct(HitNormal, PortalUp);
+	
 	//FRotator NRotator = FMatrix(HitNormal, PortalRight, PortalUp, FVector::ZeroVector).Rotator();
 	/*InPortal->SetActorRotation(NRotator);
 	InPortal->SetActorRelativeRotation(NRotator);
 	InPortal->SetActorLocation(HitLocation + HitNormal * 5.f);
 	
-	AddToPlayerInteractionDelegate(InPortal);
 	*/
 
 	
@@ -112,29 +108,28 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 	FVector LocalHitLocation = InversedTransform.TransformPosition(HitLocation);
 	FVector LocalHitNormal = InversedTransform.TransformVectorNoScale(HitNormal);
 	FVector2D AdjustPoint, FaceSize, HitPoint, ValidRange;
+	if (FMath::Abs(LocalHitNormal.X) > 0.9f)
 	{
-		if (FMath::Abs(LocalHitNormal.X) > 0.9f)
-		{
-			FaceSize = { LocalBoxExtent.Y, LocalBoxExtent.Z };
-			HitPoint = { LocalHitLocation.Y, LocalHitLocation.Z };
-			ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
-			AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
-		}
-		else if (FMath::Abs(LocalHitNormal.Y) > 0.9f)
-		{
-			FaceSize = { LocalBoxExtent.X, LocalBoxExtent.Z };
-			HitPoint = { LocalHitLocation.X, LocalHitLocation.Z };
-			ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
-			AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
-		}
-		else
-		{
-			FaceSize = { LocalBoxExtent.X, LocalBoxExtent.Y };
-			HitPoint = { LocalHitLocation.X, LocalHitLocation.Y };
-			ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
-			AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
-		}
+		FaceSize = { LocalBoxExtent.Y, LocalBoxExtent.Z };
+		HitPoint = { LocalHitLocation.Y, LocalHitLocation.Z };
+		ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
+		AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
 	}
+	else if (FMath::Abs(LocalHitNormal.Y) > 0.9f)
+	{
+		FaceSize = { LocalBoxExtent.X, LocalBoxExtent.Z };
+		HitPoint = { LocalHitLocation.X, LocalHitLocation.Z };
+		ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
+		AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
+	}
+	else
+	{
+		FaceSize = { LocalBoxExtent.X, LocalBoxExtent.Y };
+		HitPoint = { LocalHitLocation.X, LocalHitLocation.Y };
+		ValidRange = FaceSize - FVector2D(LocalPortalExtent.X + EdgeMargin, LocalPortalExtent.Y + EdgeMargin);
+		AdjustPoint = FVector2D(FMath::Clamp(HitPoint.X, -ValidRange.X, ValidRange.X), FMath::Clamp(HitPoint.Y, -ValidRange.Y, ValidRange.Y));
+	}
+
 	//DEBUG_HELPER_PRINT_VECTOR(FVector(ValidRange, 0));
 	if (PortalUp.Z < 0.f)
 	{
@@ -147,6 +142,7 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 		if (InPortal)
 		{
 			//DEBUG_HELPER_PRINT_LINE();
+			AddToPlayerInteractionDelegate(InPortal);
 			InPortal->SetActorLocationAndRotation(HitLocation + HitNormal * 5.f, NewRotator);
 		}
 		return;
@@ -177,6 +173,7 @@ void APortalPlatform::SpawnPortal(const bool& CanEnter, APortalPortal* InPortal,
 	if (InPortal)
 	{
 		//DEBUG_HELPER_PRINT_INSTANCE();
+		AddToPlayerInteractionDelegate(InPortal);
 		InPortal->SetActorLocationAndRotation(NewWorldLocation, NewRotator);
 		return;
 	}
@@ -187,11 +184,14 @@ void APortalPlatform::AddToPlayerInteractionDelegate(APortalPortal* InPortal)
 {
 	if (InPortal->ActorHasTag("Blue"))
 	{
-		//if (IsValid(BluePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *BluePlatform->GetName());
+		if (IsValid(BluePlatform)) UE_LOG(LogTemp, Display, TEXT("%s"), *BluePlatform->GetName());
+		UE_LOG(LogTemp, Display, TEXT("%s"), *this->GetName());
 		if (APortalPlatform::BluePlatform == this)
 		{
+			UE_LOG(LogTemp, Display, TEXT("Equal Blue"));
 			return;
 		}
+		UE_LOG(LogTemp, Display, TEXT("New Blue"));
 		InPortal->OnAttachPortal.RemoveAll(APortalPlatform::BluePlatform);
 		InPortal->OnDetachPortal.RemoveAll(APortalPlatform::BluePlatform);
 		InPortal->OnAttachPortal.AddDynamic(this, &APortalPlatform::OffPawnCollision);
@@ -200,11 +200,16 @@ void APortalPlatform::AddToPlayerInteractionDelegate(APortalPortal* InPortal)
 	}
 	else if (InPortal->ActorHasTag("Orange"))
 	{
-		//if (IsValid(OrangePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *OrangePlatform->GetName());
+		//if (IsValid(OrangePlatform)) UE_LOG(CustomDebuggingLog, Display, TEXT("%s"), *OrangePlatform->GetName());UE_LOG(LogTemp, Display, TEXT("%s"), *this->GetName());
+		UE_LOG(LogTemp, Display, TEXT("%s"), *this->GetName());
 		if (APortalPlatform::OrangePlatform == this)
 		{
+			UE_LOG(LogTemp, Display, TEXT("%s"), *OrangePlatform->GetName());
 			return;
 		}
+		UE_LOG(LogTemp, Display, TEXT("New Orange"));
+		InPortal->OnAttachPortal.RemoveAll(APortalPlatform::OrangePlatform);
+		InPortal->OnDetachPortal.RemoveAll(APortalPlatform::OrangePlatform);
 		InPortal->OnAttachPortal.AddDynamic(this, &APortalPlatform::OffPawnCollision);
 		InPortal->OnDetachPortal.AddDynamic(this, &APortalPlatform::OnPawnCollision);
 		OrangePlatform = this;
@@ -214,13 +219,17 @@ void APortalPlatform::AddToPlayerInteractionDelegate(APortalPortal* InPortal)
 void APortalPlatform::OnPawnCollision(APortalPortal* Portal)
 {
 	//MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
+	UE_LOG(LogTemp, Display, TEXT("OnPawnCollision"));
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void APortalPlatform::OffPawnCollision(APortalPortal* Portal)
 {
 	//MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
+	UE_LOG(LogTemp, Display, TEXT("OffPawnCollision"));
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Overlap);
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 #pragma endregion Place

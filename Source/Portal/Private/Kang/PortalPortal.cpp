@@ -50,7 +50,7 @@ void APortalPortal::OnPortalNoticeObject(UPrimitiveComponent* OverlappedComponen
 	
 	if (OtherActor->GetClass() == GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass())
 	{
-		//UE_LOG(CustomDebuggingLog, Warning, TEXT("Player : %s"), *GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Player : %s"), *GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass()->GetName());
 		OnAttachPortal.Broadcast(this);
 	}
 }
