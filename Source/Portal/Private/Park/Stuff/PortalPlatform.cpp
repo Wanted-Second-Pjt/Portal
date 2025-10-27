@@ -218,16 +218,12 @@ void APortalPlatform::AddToPlayerInteractionDelegate(APortalPortal* InPortal)
 
 void APortalPlatform::OnPawnCollision(APortalPortal* Portal)
 {
-	//MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Block);
-	UE_LOG(LogTemp, Display, TEXT("OnPawnCollision"));
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Block);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
 
 void APortalPlatform::OffPawnCollision(APortalPortal* Portal)
 {
-	//MeshComp->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECR_Overlap);
-	UE_LOG(LogTemp, Display, TEXT("OffPawnCollision"));
 	MeshComp->SetCollisionResponseToAllChannels(ECR_Overlap);
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }

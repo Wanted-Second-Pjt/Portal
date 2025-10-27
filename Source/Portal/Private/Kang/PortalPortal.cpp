@@ -45,12 +45,9 @@ void APortalPortal::Tick(float DeltaTime)
 }
 
 void APortalPortal::OnPortalNoticeObject(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
-{
-	//UE_LOG(CustomDebuggingLog, Warning, TEXT("OtherActor : %s"), *OtherActor->GetClass()->GetName());
-	
+{	
 	if (OtherActor->GetClass() == GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player : %s"), *GetWorld()->GetFirstPlayerController()->GetPawn()->GetClass()->GetName());
 		OnAttachPortal.Broadcast(this);
 	}
 }

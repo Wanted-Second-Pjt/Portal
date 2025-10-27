@@ -101,8 +101,6 @@ void UControlComponent::ApplyMouseInput()
 	PlayerController->GetInputMouseDelta(DeltaX, DeltaY);
 	DeltaX *= MouseSensitivityX;
 	DeltaY *= MouseSensitivityY;
-	//DEBUG_HELPER_PRINT_FLOAT(DeltaX);
-	//DEBUG_HELPER_PRINT_FLOAT(DeltaY);
 	if (FMath::IsNearlyZero(DeltaX) && FMath::IsNearlyZero(DeltaY))
 	{
 		return;
