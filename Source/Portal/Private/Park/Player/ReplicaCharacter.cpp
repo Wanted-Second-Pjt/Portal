@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Park/Player/ReplicaCharacter.h"
+
 #include "Kang/PortalPortal.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -29,6 +30,7 @@ AReplicaCharacter::AReplicaCharacter()
 void AReplicaCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	SetActorHiddenInGame(true);
 	
 	InitializeAsReplica();
 }
@@ -36,16 +38,16 @@ void AReplicaCharacter::BeginPlay()
 void AReplicaCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (!bReplicaVisible || !IsValid(LinkedPortal))
+	if (!bReplicaVisible || !IsValid(EntrancePortal) || !IsValid(LinkedPortal) || !GetOwner())
 	{
 		return;
 	}
 	
-	const FVector NewActorLocation = LinkedPortal->PortalCamera->GetComponentLocation() +
-		(GetActorLocation() - GetMesh()->GetSocketLocation("CameraSocket"));
-	//const FRotator NewActorRotation = LinkedPortal->PortalCamera->GetComponentRotation() + FRotator(0.f, 90.f, 0.f);
-	SetActorLocation(NewActorLocation);
-	//SetActorRotation(NewActorRotation);
+	const FVector NewActorLocation = LinkedPortal->PortalCamera->GetComponentLocation() + (GetActorLocation() - GetMesh()->GetSocketLocation("CameraSocket"));
+	const FRotator NewActorRotation = GetOwner()->GetActorRotation() - FRotator(0.0f, -90.0f, 0.0f);
+	
+	SetActorLocationAndRotation(NewActorLocation, NewActorRotation);
+	
 }
 
 void AReplicaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -68,17 +70,6 @@ void AReplicaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 void AReplicaCharacter::InitializeAsReplica()
 {
-	// In Setup PlayerInput Comp
-	// if (bDisableInputOnSpawn)
-	// {
-	// 	DisableInput(nullptr);
-	//
-	// 	if (GetController())
-	// 	{
-	// 		GetController()->UnPossess();
-	// 	}
-	// }
-
 	if (bDisableCollisionOnSpawn)
 	{
 		SetActorEnableCollision(false);
@@ -125,14 +116,20 @@ void AReplicaCharacter::SetReplicaVisibility(bool bVisible, APortalPortal* Porta
 	bReplicaVisible = bVisible;
 	SetActorHiddenInGame(!bVisible);
 	GetMesh()->CastShadow = bVisible;
-	if (bVisible && IsValid(Portal))
+	
+	if (bVisible && IsValid(Portal) && IsValid(Portal->LinkedPortal))
 	{
+		EntrancePortal = Portal;
 		LinkedPortal = Portal->LinkedPortal;
+		AttachToComponent(LinkedPortal->PortalCamera,
+			FAttachmentTransformRules::KeepRelativeTransform
+		);
+		return;
 	}
-	else
-	{
-		LinkedPortal = nullptr;
-	}
+	
+	DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	EntrancePortal = nullptr;
+	LinkedPortal = nullptr;
 }
 
 
@@ -153,10 +150,10 @@ void AReplicaCharacter::UpdateAnimationData(const FReplicaAnimationData& AnimDat
 void AReplicaCharacter::TriggerPortalEffect(bool bEntering)
 {
 	//OnPortalEffectTriggered(bEntering);
-	if (IsValid(LinkedPortal))
+	/*if (IsValid())
 	{
 		// Enter Portal Effect...Someday..
-	}
+	}*/
 }
 
 
@@ -189,11 +186,8 @@ void AReplicaCharacter::SetupReplicaDefaults()
 {
 	if (USkeletalMeshComponent* MeshComp = GetMesh())
 	{
-		
 		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		
 		MeshComp->SetSimulatePhysics(false);
-		
 		MeshComp->SetCastShadow(bEnableShadowCasting);
 		
 		// update only bones
@@ -203,7 +197,6 @@ void AReplicaCharacter::SetupReplicaDefaults()
 		{
 			ReplicaAnimInstance = TempAnimInstance;
 		}
-		
 	}
 	
 	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
@@ -215,6 +208,7 @@ void AReplicaCharacter::SetupReplicaDefaults()
 	{
 		CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+		
 	}
 }
 

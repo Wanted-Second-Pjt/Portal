@@ -103,7 +103,7 @@ public:
 	void TriggerPortalEffect(bool bEntering);
 #pragma endregion Anim
 
-private:
+protected:
 #pragma region Replica
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(AllowPrivateAccess), Category = "Replica Settings")
 	bool bDisableCollisionOnSpawn;
@@ -120,6 +120,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
 	bool bReplicaVisible;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
+	APortalPortal* EntrancePortal = nullptr;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = "Runtime State")
 	APortalPortal* LinkedPortal = nullptr;
 #pragma endregion Replica
